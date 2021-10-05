@@ -1,0 +1,75 @@
+---
+title: "Ejercicio cadenas de texto"
+author: "Antonio David Villegas Yeguas"
+date: "5/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ejercicios sobre cadenas de texto en R
+
+## 1. Crea un vector de strings con tu primer nombre y tus dos apellidos. A partir de éste crea un nuevo string con la inicial de tu nombre (y un punto) y el apellido completo utilizando lo aprendido anteriormente. En mi caso debería quedar: "A. Villegas Yeguas".
+
+En este ejercicio almacenaremos en un vector de tres posiciones una para cada palabra del nombre. Tras esto, de la primera palabra cogeremos la primera letra y le añadiremos un "." sin ningún separador, y esta nueva variable sustituirá la primera posición del vector del nombre. Finalmente, utilizando la función `paste` con el parámetro `collapse`, uniremos todos los elementos del vector en un único string.
+
+```{r}
+nombre_completo <- c("Antonio", "Villegas", "Yeguas")
+primer_nombre_abreviado <- substr(nombre_completo[1], 1, 1)
+nombre_completo[1] <- paste(primer_nombre_abreviado, ".", sep = "")
+nombre_completo_abreviado <- paste(nombre_completo, collapse = " ")
+nombre_completo_abreviado
+```
+
+## 2. Dado un vector de fechas, expresadas como strings (e.g., [“2005-11-28”, “2015-10-18”, “2000-01-01”]), muestra solamente aquellas correspondientes a los meses impares.
+
+En este ejercicio separaremos las fechas por el caracter `"-"` con `strsplit` e introduciremos el resultado en una matriz, de forma que cada fila sea una fecha, la primera columna será el año, la segunda el mes y la tercera el día. Con esto, buscaremos las que tienen un mes impar utilizando la segunda columna de la matriz y mostraremos estas en pantalla.
+
+```{r}
+fechas <- c("2005-11-28", "2015-10-18", "2000-01-01")
+lista_fechas_separadas <- matrix(unlist(strsplit(fechas, split = "-")), ncol = 3, byrow = TRUE)
+tiene_mes_impar <- as.numeric(lista_fechas_separadas[, 2]) %% 2
+tiene_mes_impar <- grep("[1]", tiene_mes_impar)
+fechas[tiene_mes_impar]
+```
+
+## 3. Dado un string con varias palabras (e.g., “Esta es una frase, pero no cualquier frase.”) crea un vector con cada una de las palabras del string (e.g., ["Esta","es","una","frase","pero","no","cualquier","frase"]).
+
+En este ejercicio separaremos las palabras utilizando `strsplit` y los espacios en blanco y signos de puntuacion como separador (`[:blank:]` y `[:punct:]` en una expresión regular). Tras esto, utilizando `grep` nos quedaremos con los resultados que tienen contenido.
+
+```{r}
+frase <- "Esta es una frase, pero no cualquier frase."
+palabras_frase <- unlist(strsplit(frase, split = "[[:blank:][:punct:]]"))
+con_contenido <- grep(".", palabras_frase)
+palabras_frase[con_contenido]
+```
+
+## 4. Busca las palabras que usan solamente las vocales “a” y “e” en un vector de strings
+
+En este ejercicio aplicaremos `grep`, buscaremos las palabras que utilizan las demás vocales con la expresión regular `[iou]`, pero utilizaremos el parámetro `invert = TRUE` para que nos de los indices de aquellas posiciones que *no* cumplan la expresión regular, es decir, aquellas que no utilicen las vocales a excepción de la "a" y la "e".
+
+```{r}
+palabras_ejemplo = c("Hola", "esta", "palabra", "no", "o", "si", "tiene", "vocales")
+palabras_solo_con_a_y_e = grep("[iou]", palabras_ejemplo, invert = TRUE)
+palabras_ejemplo[palabras_solo_con_a_y_e]
+```
+
+## 5. Dados tres vectores dia, mes y anno crea un vector con las fechas completas. Si la fecha es inválida, ésta se descartará (Ayuda: investiga la función as.Date).
+
+En este ejercicio concatenaremos el año, mes y día con el separador "-" utilizando `paste` y le pasaremos el resultado a la función `as.Date`, la cual nos devolverá la fecha si es valida o NA si no es valiada. De esta forma podemos filtrar las fechas que no son válidas.
+
+```{r}
+dias <- c(12, 30, 31, 14, 2, 31, 29)
+mes  <- c(1,  2,   3, 12, 5,  4,  2)
+anno <- c(2004, 2005, 2009, 2010, 2021, 2007, 2000)
+fechas <- paste(anno, mes, dias, sep = "-")
+print("Fechas dadas: ")
+print(fechas)
+fechas <- as.Date(fechas, optional = FALSE)
+print("Fechas validas:")
+print(fechas[grep("[^NA]", fechas)])
+```
+
+
