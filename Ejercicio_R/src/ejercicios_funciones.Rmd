@@ -1,0 +1,31 @@
+---
+title: "Ejercicio funciones"
+author: "Antonio David Villegas Yeguas"
+date: "6/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Ejercicios sobre funciones en R
+
+## Crea una función "impares" que dado un vector devuelva la cantidad de elementos impares que contiene.
+
+Para este ejercicio creamos una función que sume el resultado de aplicar la operación de módulo con 2 a los elementos del vector.
+
+```{r}
+impares <- function(vector_entrada){
+	numero_impares <- sum(vector_entrada %% 2)
+	numero_impares
+}
+
+vector_ejemplo = c(23, 1, 22, 50, 55, 33, 24)
+print(impares(vector_ejemplo))
+```
+
+## Crea una función "cambio" que dada una matriz de numeros enteros reemplaze todos los NA por el valor 0.
+
+
