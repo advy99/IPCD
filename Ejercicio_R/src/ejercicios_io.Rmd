@@ -1,0 +1,70 @@
+---
+title: "Ejercicios Input/Output"
+author: "Antonio David Villegas Yeguas"
+date: "6/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ejercicios sobre entrada/salida en R
+
+## Pide al usuario que introduzca por teclado un string s y un número n y que muestre en pantalla n veces seguidas el string s (sin espacios entre palabra y palabra).
+
+En este ejercicio pediremos la entrada con la función `readline` (en lugar de `scan` para poder mostrar un mensaje y evitar tener que parar la lectura con el EOF), crearemos un vector de longitud `n` con caracteres vacios, y con la función paste y la regla del reciclado obtendremos el resultado final, juntando todas las posiciones vacias del vector con la linea introducida.
+
+```{r}
+s <- readline("Introduce una cadena: ")
+n <- readline("Introduce un numero: ")
+cadena_como_vector <- vector(mode = "character",length = n)
+cadena_final <- paste(cadena_como_vector, s, sep = "", collapse = "")
+print(cadena_final)
+```
+
+## Crea tres ficheros llamados dos.txt, tres.txt y cinco.txt que contenga la tabla del 2, la del 3 y la del 5 respectivamente (los primeros 10 valores de cada tabla, un número en cada línea de cada fichero).
+
+Para este ejercicio simplemente escribimos el vector de 1 a 10 multiplicado por el respectivo número con la función `write`, escribiendo un una única columna para que en cada lina se escriba un número.
+
+```{r}
+write(1:10 * 2, file = "dos.txt", ncolumns = 1)
+write(1:10 * 3, file = "tres.txt", ncolumns = 1)
+write(1:10 * 5, file = "cinco.txt", ncolumns = 1)
+```
+
+### Carga los tres ficheros creados en el punto anterior y construye una matriz que, en cada columna, tengo el contenido de cada fichero.
+
+Para resolver este ejercicio leemos con `read.table` cada uno de los ficheros, almacenandolos en una lista, y los deslistamos. Tras esto creamos una matriz con esos elementos y tres columnas y obtenemos el resultado que queriamos.
+
+```{r}
+elementos_ficheros <- unlist(list(read.table("dos.txt"), read.table("tres.txt"), read.table("cinco.txt")))
+matriz <- matrix(elementos_ficheros, ncol = 3)
+matriz
+```
+
+
+## Escribe las cinco primera filas de matriz del ejercicio anterior en un fichero nuevo llamado prime.txt y las cinco últimas en otro fichero llamado fin.txt. Ambos ficheros deben tener los datos separados por comas.
+
+Para este apartado simplmente utilizaremos `write.table` con el parametro `sep = ","` para separar los datos con comas. Como datos le pasaremos, en la primera llamada las cinco primeras filas con todas las columnas, y en la segunda llamada el resto de filas con todas las columnas.
+
+```{r}
+write.table(matriz[1:5, ], file = "prime.txt", sep = ",")
+write.table(matriz[5:nrow(matriz), ], file = "fin.txt", sep = ",")
+```
+
+
+## Dados dos números introducidos por el usuario f y c, crea un cuadrado de f filas y c columnas con el caracter "x".
+
+Para resolverlo simplemente utilizamos la función `matrix` para crear la matriz. Utilizaremos como valor "x", y el número de filas y columnas dado por el usuario.
+
+```{r}
+f <- readline("Introduce un numero: ")
+c <- readline("Introduce un numero: ")
+
+matriz <- matrix("x", nrow = as.numeric(f), ncol = as.numeric(c))
+matriz
+```
+
+
+
