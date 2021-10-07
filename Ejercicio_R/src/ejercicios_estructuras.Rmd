@@ -1,0 +1,130 @@
+---
+title: "ejercicios_estructuras"
+author: "Antonio David Villegas Yeguas"
+date: "7/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ejercicios sobre estructuras de programación en R
+
+## Crea una función creciente que indique si los elementos de un vector dado son estrictamente crecientes. No se permite ordenar el vector.
+
+```{r}
+creciente <- function(vector_entrada) {
+	resultado <- TRUE
+	
+	# miramos si el minimo está en la posicion 1 y eliminamos esa posicion
+	# de esta forma, si no está ordenado de forma creciente, el minimo no estará en la
+	# primera posicion
+	while(length(vector_entrada) > 0 && resultado) {
+		resultado = min(vector_entrada) == vector_entrada[1]
+		vector_entrada <- vector_entrada[-1]
+	}
+	
+	resultado
+}
+
+v1 <- 1:10
+v2 <- 1:10
+v2[4] <- 0
+print(v1)
+print(creciente(v1))
+print(v2)
+print(creciente(v2))
+```
+
+
+## Crea una función "montecarlo" que calcule la estimación de la siguiente integral: 
+
+```{r}
+montecarlo <- function(num_iteraciones = 1000) {
+	# creamos un vector de numeros aleatorios entre 0 y 1,
+	# tantos aleatorios como iteraciones
+	total <- runif(num_iteraciones, 0, 1)
+	
+	# creamos una funcion que nos realice la comprobacion y
+	# aplicamos lapply sobre los numeros aleatorios
+	f <- function(value) ifelse(value < runif(1, 0,1)^2, 1, 0)
+	total <- unlist(lapply(total, f ))
+	sum(total) / num_iteraciones
+}
+print(montecarlo(1000000))
+```
+
+## Crea una lista de 5 vectores numéricos y ordena todos los vectores de la lista.
+
+
+```{r}
+
+# creamos un vector de longitud cinco
+lista <- vector(length = 5)
+
+# con lapply, cremos una lista de cinco vectores, cada uno de ellos con 10 numeros aleatorios
+# entre 0 y 10
+lista <- lapply(lista, function(objeto) {objecto <- runif(10, 0, 10)})
+
+# ordenamos cada elemento de la lista
+lista <- lapply(lista, sort)
+lista
+```
+
+## Calcula el valor mínimo de cada columna de una matriz, pero toma los valores impares como numeros negativos y los pares como positivos.
+
+En este ejercicio he tenido dos interpretaciones del enunciado.
+
+1. Los valores de las posiciones impares los interprete como números negativos
+
+```{r}
+valores <- runif(25, 0, 10)
+matriz <- matrix(valores, 5, 5)
+matriz
+f <- function(columna) {
+	# las posiciones impares pasan a ser negativas
+	columna[seq(1, length(columna), 2)] <- -columna[seq(1, length(columna), 2)]
+	# devuelvo el minimo de la columna
+	min(columna)
+}
+# con la funcion apply se lo aplico a cada columna de la matriz
+min_values <- apply(matriz, 2, f)
+min_values
+```
+
+
+2. Los valores que sean impares son negativos (aqui solo uso valores enteros)
+
+```{r}
+valores <- as.integer(runif(25, 0, 10))
+matriz <- matrix(valores, 5, 5)
+matriz
+f <- function(columna) {
+	# si un valor en columna es par, lo devuelvo, si es impar, le cambio el signo
+	columna <- ifelse(columna %% 2 == 0, columna, -columna)
+	# devuelvo el minimo de la columna
+	min(columna)
+}
+
+# con la funcion apply se lo aplico a cada columna de la matriz
+min_values <- apply(matriz, 2, f)
+min_values
+
+```
+
+## Dada una matriz devuelva una lista con los valores mayores a 7 de cada fila.
+
+```{r}
+valores <- as.integer(runif(25, 0, 15))
+matriz <- matrix(valores, 5, 5)
+matriz
+# con la funcion apply se lo aplico a cada fila de la matriz
+# devolvemos los valores de la fila que sean mayores que siete
+mayor_siete <- apply(matriz, 1, function(fila){fila[fila > 7]})
+# en cada posición de la lista estarán los valores que son mayores a 7 de la respectiva
+# fila en la matriz
+mayor_siete
+
+```
+
