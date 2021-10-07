@@ -28,4 +28,95 @@ print(impares(vector_ejemplo))
 
 ## Crea una función "cambio" que dada una matriz de numeros enteros reemplaze todos los NA por el valor 0.
 
+```{r}
+cambio <- function(matriz_entrada) {
+	# almacenamos las dimensiones
+	dimensiones <- dim(matriz_entrada)
+	
+	# buscamos los indices de los que NO son numeros (notar que el parámetro invert
+	# está a TRUE)
+	indices <- grep("[1-9+]", as.vector(matriz_entrada), invert = TRUE)
+	como_vector <- as.vector(matriz_entrada)
+	# cambiamos los elementos que no son números (NA) a 0
+	como_vector[indices] <- 0
+	# devolvemos la forma de matriz y devolvemos el resultado
+	matrix(como_vector, ncol = dimensiones[1], nrow = dimensiones[2])
+
+}
+
+m <- matrix(1:100, ncol = 10)
+m[as.integer(runif(5, 1, nrow(m))), as.integer(runif(5, 1, ncol(m)))] <- NA
+m
+m <- cambio(m)
+m
+```
+
+
+## Crea una función "unir" que dados dos vectores devuelva un nuevo vector con los elementos de ambos vectores sin repetidos.
+
+Para este ejercicio escogemos todos los valores del primer vector, pero del segundo vector solo escogemos aquellos valores que no están en b utilizando el operador `%in%`
+
+```{r}
+unir <- function(vector_a, vector_b) {
+	c(vector_a, vector_b[!(vector_b %in% vector_a)])
+}
+
+vector1 <- c(1:20)
+vector2 <- c(15:25)
+resultado <- unir(vector1, vector2)
+resultado
+```
+
+## Crea una función "vyc" que dado un string devuelva una lista de dos componentes que contenga las vocales y las consonantes.
+
+```{r}
+vyc <- function(string_entrada) {
+	# eliminamos lo que no sea palabra y los espacios en blanco
+	string_entrada <- gsub("[\\W[:blank:]]", "", string_entrada)
+	# dividimos el string por caracteres
+	string_entrada <- unlist(strsplit(string_entrada, split = ""))
+	# con grep nos quedamos con las consonantes y las vocales 
+	consonantes <- string_entrada[grep("[^aeiouAEIOU]", string_entrada)]
+	vocales <- string_entrada[grep("[aeiouAEIOU]", string_entrada)]
+	list(vocales, consonantes)
+}
+
+cadena <- "Mi cadena de caracteres"
+lista_vyc <- vyc(cadena)
+print(lista_vyc)
+```
+
+
+## Crea una función partir que dado un vector v y dos valores x e y (siendo y opcional), retorne un vector con los valores que aparecen luego del primer x y hasta el primer y. De no indicarse el valor de y se devolveran todos los valores que aparecen luego del primer x hasta el final del vector.
+
+```{r}
+partir <- function(v, x, y = NA) {
+	# buscamos x  en la lista
+	primera_pos <- grep(paste("^",x,"$", sep = ""), v)[1]
+	# le resto una para que no incluya el ultimo elemento
+	ultima_pos <- grep(paste("^",y,"$", sep = ""), v)[1] - 1
+	
+	# en caso de que y sea NA, lo eliminamos con min de NA y la longitud
+	# de v, para quedarnos con la longitud de v
+	ultima_pos <- min(ultima_pos, length(v), na.rm = TRUE)
+	
+	# cogemos el intervalo que nos interesa
+	resultado <- v[primera_pos:ultima_pos]
+	# le quitamos el primer resultado,
+	# ya que nos piden despues del primer x
+	# el ultimo ya se lo hemos quitado al restar uno a ultima pos
+	# y si no dan y quieren todo el vector, manteniendo el ultimo, así
+	# que no es necesario quitarlo
+	resultado <- resultado[-1]
+}
+vec <- c(1, 2, 4, 6, 3, 4, 6, 5)
+resultado <- partir(vec, 4, 5)
+print(resultado)
+resultado <- partir(vec, 4)
+print(resultado)
+resultado <- partir(vec, 4, 3)
+print(resultado)
+
+```
+
 
