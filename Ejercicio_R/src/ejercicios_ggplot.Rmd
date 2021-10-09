@@ -60,9 +60,43 @@ ggplot(data = ex2, aes(x = snow.cover)) +
 
 ## Given the following data:
 
+```{r}
+library(readr)
+datos <- read_csv("datos.csv")
+
+# para trabajar mejor con los datos
+# todo en minuscula, cambio espacios por _ y sin parentesis
+nuevos_nombres <- tolower(colnames(datos))
+nuevos_nombres <- lapply(nuevos_nombres, gsub, pattern = "[ ]", replacement = "_")
+nuevos_nombres <- unlist(lapply(nuevos_nombres, gsub, pattern = "[()]", replacement = ""))
+nuevos_nombres
+colnames(datos) <- nuevos_nombres
+summary(datos)
+```
+
+
 1. Create a function to convert ºF to ºC and in (inches) to mm.
 
+```{r}
+fahrenheit_to_celsius <- function(val) {
+	val - 32 / 1.8
+}
+
+inches_to_milimeters <- function(val) {
+	val * 25.4
+}
+```
+
+
 2. Plot Year vs. Warmest Minimum Temperature.
+
+```{r}
+
+ggplot(data = datos, aes(x = year, y = warmest_minimum_temperature_f)) + 
+	geom_line() +
+	labs(title = "Eurasia: Year vs Warmest Minimum Temperature", x = "Year", y = "Warmest Minimum Temperature (Fahrenheit)")
+
+```
 
 3. Plot Year vs. Warmest Minimum Temperature and Coldest Minimum Temperature. Don’t forget to add a legend!
 
