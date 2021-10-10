@@ -1,7 +1,7 @@
 ---
 title: "Ejercicios ggplot2 en R"
 author: "Antonio David Villegas Yeguas"
-date: "7/10/2021"
+date: "8/10/2021"
 output: pdf_document
 ---
 
@@ -62,13 +62,15 @@ ggplot(data = ex2, aes(x = snow.cover)) +
 
 ```{r}
 library(readr)
-datos <- read_csv("datos.csv")
-
+datos <- read_csv("datos.csv", col_types = "d")
+# algunos los lee como char, de ahi el cambio
+datos <- as.data.frame(lapply(datos, as.double))
+datos
 # para trabajar mejor con los datos
 # todo en minuscula, cambio espacios por _ y sin parentesis
 nuevos_nombres <- tolower(colnames(datos))
-nuevos_nombres <- lapply(nuevos_nombres, gsub, pattern = "[ ]", replacement = "_")
-nuevos_nombres <- unlist(lapply(nuevos_nombres, gsub, pattern = "[()]", replacement = ""))
+nuevos_nombres <- lapply(nuevos_nombres, gsub, pattern = "..", replacement = "_", fixed = TRUE)
+nuevos_nombres <- unlist(lapply(nuevos_nombres, gsub, pattern = ".", replacement = "_", fixed = TRUE))
 nuevos_nombres
 colnames(datos) <- nuevos_nombres
 summary(datos)
@@ -85,6 +87,24 @@ fahrenheit_to_celsius <- function(val) {
 inches_to_milimeters <- function(val) {
 	val * 25.4
 }
+
+# las columnas de grados le aplicamos la función para cambiar a celsius
+datos[2:8] <- lapply(datos[2:8], fahrenheit_to_celsius)
+
+# le cambiamos el nombre, las que acaban por _f por _c
+nuevos_nombres <- unlist(lapply(colnames(datos), gsub, pattern = "_f_", replacement = "_c", fixed = TRUE))
+colnames(datos) <- nuevos_nombres
+datos
+
+# las columnas de pulgadas le aplicamos la función para cambiar a mm
+datos[9:12] <- lapply(datos[9:12], inches_to_milimeters)
+
+# le cambiamos el nombre, para que las que son in, pasen a mm
+nuevos_nombres <- unlist(lapply(colnames(datos), gsub, pattern = "_in_", replacement = "_mm", fixed = TRUE))
+colnames(datos) <- nuevos_nombres
+datos
+
+
 ```
 
 
@@ -92,13 +112,23 @@ inches_to_milimeters <- function(val) {
 
 ```{r}
 
-ggplot(data = datos, aes(x = year, y = warmest_minimum_temperature_f)) + 
+ggplot(data = datos, aes(x = year, y = warmest_minimum_temperature_c)) + 
 	geom_line() +
-	labs(title = "Eurasia: Year vs Warmest Minimum Temperature", x = "Year", y = "Warmest Minimum Temperature (Fahrenheit)")
+	labs(title = "Year vs Warmest Minimum Temperature", x = "Year", y = "Warmest Minimum Temperature (Celsius)")
 
 ```
 
 3. Plot Year vs. Warmest Minimum Temperature and Coldest Minimum Temperature. Don’t forget to add a legend!
+
+
+```{r}
+ggplot(data = datos, aes(x = year)) + 
+	geom_line(aes(y = warmest_minimum_temperature_c, color = "Warmest Minimum")) +
+	geom_line(aes(y = coldest_minimum_temperature_c, color = "Coldest Minimum")) +
+	labs(title = "Year vs Warmest Minimum Temperature and Coldest Minimum Temperature", x = "Year", y = "Temperature (Celsius)") +
+	scale_color_manual(name = "Temperatures", values = c("Warmest Minimum" = "red", "Coldest Minimum" = "blue"))
+
+```
 
 
 
