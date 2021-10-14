@@ -16,3 +16,7 @@ def eliminar_letras(palabra, letra):
 
 	return resultado
 
+
+print("Si a 'palabra' le quitamos la letra 'a' nos queda: {}".format(eliminar_letras("palabra", 'a')))
+
+
