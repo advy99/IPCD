@@ -13,7 +13,7 @@ def es_mayuscula(letra):
 
 
 def es_minuscula(letra):
-	return ord(letra) >= ord('a') and ord(letra) <= ord('a')
+	return ord(letra) >= ord('a') and ord(letra) <= ord('z')
 
 def convertir_a_minuscula(letra):
 	# para converir a minuscula, a una mayuscula
@@ -41,6 +41,10 @@ def mayusculas_minusculas(palabra):
 	
 	return resultado
 			
+if __name__ == "__main__":
+	cadena =  "Hola Mundo"
+	print("Si en la cadena {} cambiamos las mayusculas por minusculas y viceversa nos queda: {}".format( 
+			cadena, mayusculas_minusculas(cadena)))
 
 
 
