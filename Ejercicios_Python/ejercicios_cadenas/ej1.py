@@ -17,8 +17,7 @@ def contar_letras(palabra, letra):
 
 	return num_apariciones
 
-# pruebas
-
-print("En la palabra 'palabra' aparecen {} veces la letra 'a' y {} veces la letra 'r'".format(contar_letras("palabra", 'a'), contar_letras("palabra", 'r')))
+if __name__ == "__main__":
+	print("En la palabra 'palabra' aparecen {} veces la letra 'a' y {} veces la letra 'r'".format(contar_letras("palabra", 'a'), contar_letras("palabra", 'r')))
 
 
