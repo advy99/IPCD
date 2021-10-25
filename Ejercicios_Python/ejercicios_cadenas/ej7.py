@@ -13,7 +13,7 @@ def es_minuscula(letra):
 def convertir_a_mayuscula(letra):
 	return chr(ord(letra) - DIFERENCIA_MAYUS_MINUS)
 
-def mayusculas_minusculas(palabra):
+def mayusculas(palabra):
 	resultado = ""
 
 	for caracter in palabra:
@@ -31,7 +31,7 @@ def mayusculas_minusculas(palabra):
 if __name__ == "__main__":
 	cadena =  "Hola Mundo!"
 	print("Si en la cadena {} cambiamos todo por mayusculas nos queda: {}".format( 
-			cadena, mayusculas_minusculas(cadena)))
+			cadena, mayusculas(cadena)))
 
 
 
