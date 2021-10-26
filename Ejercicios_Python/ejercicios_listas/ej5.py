@@ -32,4 +32,14 @@ def mezclar(la, lb):
 
 	return resultado
 
+if __name__ == "__main__":
+	l1 = generar_lista.generar_lista(5)
+	l2 = generar_lista.generar_lista(3)
+
+	l1.sort()
+	l2.sort()
+
+	l3 = mezclar(l1, l2)
+
+	print("Si mezclo {} con {} obtengo: {}".format(l1, l2, l3))
 
