@@ -1,0 +1,227 @@
+---
+title: "Ejercicios dia 1"
+author: "Antonio David Villegas Yeguas"
+date: "26/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# R interactivo
+
+## Crea números del 1 al 30 usando el operador “:”
+
+
+```{r}
+1:30
+```
+
+## Busca en la ayuda que hace la función seq(). Crea una secuencia de números del 1 al 30 con un incremento de 0.5.
+
+```{r}
+?seq
+seq(1, 30, 0.5)
+```
+
+## Lee los distintos argumentos que pueden utilizar la función seq() para saber que se puede hacer. Después crea una secuencia de 100 números, empezando en el numero 20 y con un incremento del 0.5
+
+
+```{r}
+seq(from = 20, by = 0.5, length.out = 100)
+```
+
+## Investiga si existen vectores en R definidos para los siguientes casos: letras minúsculas, letras mayúsculas, nombre de los meses del año y nombre de los meses del año abreviado
+
+Si, existe `letters`, `LETTERS`, `month.name` y `month.abb` respectivamente.
+
+```{r}
+?letters
+```
+
+## Investiga la función rep() con la ayuda. Crea una secuencia que contenga los valores del 1 al 8 repetidos cinco veces.
+
+```{r}
+?rep
+rep(1:8, times = 5)
+```
+
+## Crea una secuencia que contenga las cuatro primeras letras del abecedario 6 veces.
+
+rep(letters[1:4], times = 5)
+
+
+# Vectores y manipulación de vectores
+
+## Crea los siguientes vectores utilizando el comando c():
+
+### un vector del 1 al 20
+
+```{r}
+c(1:20)
+```
+
+### un vector del 20 al 1
+
+```{r}
+c(20:1)
+```
+
+### un vector que tenga el siguiente patrón: 1, 2, 3, … , 19, 20, 19, 18,…, 2, 1
+
+```{r}
+c(1:20, 19:1)
+```
+
+## Genera un vector x que contenga 9 números comprendidos entre 1 y 5
+
+```{r}
+c(seq(1, 5, length.out = 9))
+```
+
+
+## Busca que hace la función sequence(). ¿Cual es la diferencia con la función seq()
+
+```{r}
+?sequence
+```
+
+La diferencia con `seq` es que `sequence` recibe un vector, y para cada elemento del vector genera una secuencia. Todos los argumentos son vectores de cara a poder añadir los parametros `from`, `by` entre otros.
+
+## Crea el vector numérico x <- c(2.3, 3.3, 4.4) y accede al segundo elemento del vector
+
+```{r}
+x <- c(2.3, 3.3, 4.4)
+x[2]
+```
+
+## Crea un vector numérico “z” que contenga del 1 al 10. Cambia la clase del vector forzando que sea de tipo carácter. ¿qué pasa si vuelves a poner z en la terminal?.
+
+```{r}
+z <- 1:10
+z
+z_como_caracteres <- as.character(z)
+z_como_caracteres
+```
+
+Como vemos, ha convertido cada elemento de z en cadena de caracteres
+
+## Ahora cambia el vector z a numérico de nuevo
+
+```{r}
+z_numerico <- as.numeric(z_como_caracteres)
+z_numerico
+```
+
+## Crea un vector x con 100 elementos, selecciona de ese vector una muestra al azar de tamaño 5. Quizás quieres averiguar que hace la función sample(). Investiga opciones de extraer valores con y sin remplazo.
+
+```{r}
+?sample
+x <- c(1:100)
+muestra <- sample(x, 5)
+muestra
+```
+
+Si escojo la muestra con reemplazamiento me podrían salir valores repetidos. Es decir, si tengo un vector de 100 elementos, si utilizo `sample` sin reemplazamiento para escoger cinco valores, al escoger el primer valor los elementos tienen una probabilidad de $1/100$ de ser escogidos, al escoger el segundo de $1/99$, etc, mientras que si selecciono con reemplazamiento, la probabilidad es siempre de $1/100$, ya que siempre mantengo los 100 elementos.
+
+
+## Genera un vector de enteros “integer” con 100 números entre el 1 y el 4 de forma aleatoria. Para ello mira en la ayuda la función runif().
+
+```{r}
+?runif
+
+integer <- runif(100, 1, 4)
+integer
+```
+
+## Ordena el vector por tamaño usando la función sort(). ¿Qué devuelve la función sort()?
+
+```{r}
+?sort
+ordenados <- sort(integer)
+ordenados
+```
+### Si quisieras invertir el orden de los elementos del vector que función utilizarías.
+
+```{r}
+?rev
+ordenados_decreciente <- rev(ordenados)
+ordenados_decreciente
+```
+
+
+
+## Ahora busca en la ayuda la función order(). Aplicala sobre el vector 
+x <- c(2.3, 3.3, 4.4) que hemos generado en los ejercicios anteriores. ¿Cuál es la diferencia con la función sort()?
+
+
+```{r}
+?order
+x <- c(2.3, 3.3, 4.4)
+x
+posiciones_ordenadas <- order(x)
+
+```
+
+La diferencia con `sort` es que `sort` devuelve una copia del conjunto ordenado, mientras que `order` devuelve las permutaciones que habría que realizar para ordenar el conjunto, es decir, una lista de indices que si se aplica ese orden, el vector quedaría ordenado.
+
+## Crea un vector x que contenga dos veces los números ordenados del 1 al 10. Investiga la función rep(). Una vez comprobado que funciona elimina las entradas repetidas del vector, para ello consulta la función unique().
+
+```{r}
+x <- rep(1:10, 2)
+x
+
+x <- unique(x)
+x
+```
+
+
+# Explora el indexado de Vectores
+
+## Ejecuta los siguientes comandos y comprueba su resultado
+
+```{r}
+x <- 1:10
+names(x) <- letters[x]
+x[1:3]
+x[c(1,10)]
+x[c(-1,-2)]
+x[ x > 5]
+x[c("a","d")]
+x[]
+x <- 1:10; y <- c(x[1:5],99,x[6:10]); y
+
+```
+
+## Crea un vector x con números del 1 al 100
+
+```{r}
+x <- c(1:100)
+x
+```
+
+### extrae los valores del 2 al 23.
+
+```{r}
+x[2:23]
+```
+
+### Del mismo vector x extrae ahora todos los valores menos del 2:23
+
+```{r}
+x[seq(-23, -2)]
+```
+
+### Cambia el número en la posición 5 por el valor 99
+
+```{r}
+x
+x[5] <- 99
+x
+```
+
+## Crea un vector lógico del vector letters, (e.g. comprobando si existe c en el vector letters)
+
+
