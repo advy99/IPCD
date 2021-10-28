@@ -224,4 +224,182 @@ x
 
 ## Crea un vector lógico del vector letters, (e.g. comprobando si existe c en el vector letters)
 
+```{r}
+vector_logico <- letters == 'c'
+vector_logico
+```
+
+## Qué devuelve el siguiente comando?
+
+```{r}
+which(rep(letters,2)=="c")
+```
+
+Este comando replica dos veces el vector `letters`, tras esto crea un vector lógico buscando la letra `c`, y con which comprueba que indices del vector lógico son verdaderos. Devuelve 3 y 29, la posición de las dos c.
+
+## ¿Qué devuelve el siguiente comando? 
+
+```{r}
+match(c("c","g"), letters) 
+```
+
+Con `match` busca en `letters` los elementos dados. Devuelve 3 y 7, las posiciones de la c y la g.
+
+
+## Crea un vector x de elementos -5, . . . , -1, 0, 1, . . . , 6. Escribe un código en R del tipo x['algo'], para extraer:
+
+```{r}
+x <- c(-5:6)
+x
+```
+### elementos de x menores que  0
+
+```{r}
+x[x < 0]
+```
+
+### elementos de x menores o igual que 0
+
+```{r}
+x[x <= 0]
+```
+
+
+### elementos of x mayor o igual que 3,
+
+```{r}
+x[x >= 3]
+```
+
+### elementos de x menor que 0 o mayor que  4
+
+```{r}
+x[x < 0 | x >= 4]
+```
+
+### elementos de x mayor que 0 y menor que 4
+
+```{r}
+x[x > 0 & x < 4]
+```
+
+### elementos de x distintos de 0
+
+```{r}
+x[x != 0]
+```
+
+
+## El código is.na se usa para identificar valores ausentes (NA). Crea el vector x<- c(1,2,NA) y averigua que pasa cuando escribes is.na(x). Prueba con x[ x!=NA ] ¿obtienes con este comando los “missing values” de x?. ¿cuál es tu explicación?
+
+
+```{r}
+x <- c(1, 2, NA)
+
+is.na(x)
+
+x[ x != NA ]
+
+```
+
+Cuando usamos `is.na` obtenemos un vector lógico, con la misma longitud que el vector original, que nos indica para cada posicion si un valor es NA.
+
+Si usamos la segunda opción no funciona para obtener los valores NA. La explicación es que seguramente esté comparando con el literal "NA", no buscando los missing values.
+
+## determina que objetos tienes en tu directorio de trabajo
+
+```{r}
+ls()
+```
+
+## Crea un vector de valores según la fórmula e^x cos(x) at x = 3, 3.1, 3.2, … , 6
+
+```{r}
+x <- c(seq(3, 6, 0.1))
+x
+x <- exp(x) * cos(x)
+x
+```
+
+## Calcula la siguiente sumatoria
+
+```{r}
+x <- 10:100
+x <- x^3 + 4 * x^2
+x <- sum(x)
+x
+```
+
+
+## Crea un vector con la siguiente fórmula
+
+```{r}
+x <- runif(100, 1, 100)
+x
+x_mean <- mean(x)
+x_mean
+x <- abs(x - x_mean) / 2
+x
+```
+
+## Crea los vectores
+
+```{r}
+set.seed(50)
+xVec <- sample(0:999, 250, replace=T)
+yVec <- sample(0:999, 250, replace=T)
+```
+
+### Selecciona las variables de yVec >600
+
+```{r}
+yVec[yVec > 600]
+```
+
+### R permite extraer encontrar las posiciones en las que se encuentran los elementos que cumplen una determinada condición con which(). Utiliza esta función para¿Cuáles son las posiciones de yVec >600?
+
+```{r}
+which(yVec > 600)
+```
+
+### ¿Qué posiciones de xVec son idénticas a las posiciones >600 de yVec?
+
+No entendia si pedia las posiciones de xVec que cumplian la condicion en yVec, o que cumplieran que fueran iguales y que ademas en yVec sea mayor que 600 (que no es ningun caso)
+
+```{r}
+xVec[which(yVec > 600)]
+which(yVec == xVec & yVec > 600)
+```
+
+
+### ¿Cuántos números de xVec son divisibles por 2. Nota: el operador modulo es %% en R. ¿Cuanto vale su suma?
+
+```{r}
+sum(xVec %% 2 == 0)
+suma <- sum(xVec[xVec %% 2 == 0])
+suma
+```
+
+### Ordena los numeros de xVec en orden creciente según los valores de yVec
+
+```{r}
+xVec[order(yVec)]
+```
+
+
+
+# Búsqueda de valores idénticos y distintos en Vectores
+
+## Haz la intersección de dos vectores month.name[1:4] y  month.name[3:7] usando la función intersect().
+
+```{r}
+
+```
+
+
+
+
+
+
+
 
