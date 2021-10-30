@@ -1,0 +1,260 @@
+---
+title: "Ejercicios Dataframes"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Acceso y selección de secciones de un  data frames
+
+
+## Vamos a trabajar con un ejemplo que viene por defecto en la instalación de R USArrests. Este data frame contiene la información para cada estado Americano de las tasas de criminales (por 100.000 habitantes). Los datos de las columnas se refieren a Asesinatos, violaciones y porcentaje de la población que vive en áreas urbanas. Los datos son de 1973. Contesta a las siguientes preguntas sobre los datos
+
+### Las dimensiones del dataframe
+
+```{r}
+dim(USArrests)
+```
+
+### La longitud del dataframe (filas o columnas)
+
+```{r}
+nrow(USArrests)
+ncol(USArrests)
+```
+
+
+### ¿Cómo calcularías el número de filas?
+
+Con `nrow` o `dim`
+
+```{r}
+nrow(USArrests)
+dim(USArrests)[1]
+```
+
+### Obtén el nombre de las filas y las columnas para este data frame
+
+```{r}
+rownames(USArrests)
+colnames(USArrests)
+```
+
+
+
+### échale un vistazo a los datos, por ejemplo a las seis primeras filas
+
+```{r}
+head(USArrests, 6)
+```
+
+
+### Ordena de forma decreciente las filas de nuestro data frame según el porcentaje de población en el área urbana. Para ello investiga la función order () y sus parámetros.
+
+```{r}
+USArrests[order(USArrests$UrbanPop, decreasing = T), ]
+```
+
+### ¿Podrías añadir un segundo criterio de orden?, ¿cómo?
+
+Si, añadiendo un segundo vector por el que ordenar:
+
+```{r}
+USArrests[order(USArrests$UrbanPop, USArrests$Rape, decreasing = T), ]
+```
+
+
+### Muestra por pantalla la columna con los datos de asesinato
+
+```{r}
+USArrests$Murder
+```
+
+### Muestra las tasas de asesinato para el segundo, tercer y cuarto estado
+
+```{r}
+USArrests$Murder[2:4]
+```
+
+### Muestra las primeras cinco filas de todas las columnas
+
+```{r}
+USArrests[1:5,]
+```
+
+### Muestra todas las filas para las dos primeras columnas
+
+```{r}
+USArrests[, 1:2]
+```
+
+### Muestra todas las filas de las columnas 1 y 3
+
+```{r}
+USArrests[,c(1,3)]
+```
+
+
+### Muestra solo las primeras cinco filas de las columnas 1 y 2
+
+
+```{r}
+USArrests[1:5, 1:2]
+```
+
+### Extrae las filas para el índice Murder
+
+```{r}
+USArrests["Murder"]
+```
+
+### ¿Que estado tiene la menor tasa de asesinatos? ¿qué línea contiene esa información?, obtén esa información
+
+Buscamos el minimo de esa columna, y con `which` buscamos su posicion en el dataframe
+
+```{r}
+indice_min_murder <- which(USArrests$Murder == min(USArrests$Murder))
+USArrests[indice_min_murder,]
+```
+
+### ¿Que estados tienen una tasa inferior al 4%?, obtén esa información
+
+Igual que el anterior, pero cambiando la condición del which para que sea la que tiene menos de un 4%.
+
+```{r}
+indice_murder_menor_4 <- which(USArrests$Murder < 4)
+USArrests[indice_murder_menor_4,]
+```
+
+
+### ¿Que estados estan en el cuartil superior (75) en lo que a poblacion en zonas urbanas se refiere? 
+
+```{r}
+# miramos los cuartiles y nos quedamos con el tercer
+tercer_cuartil_poblacion <- summary(USArrests$UrbanPop)[5]
+tercer_cuartil_poblacion
+# miramos todas las filas por encima del tercer cuartil
+USArrests[USArrests$UrbanPop > tercer_cuartil_poblacion,]
+```
+
+
+## Carga el set de datos CO2 y realiza las siguientes acciones:
+
+```{r}
+CO2
+```
+
+### Ordena alfabéticamente los datos en función de la variable Plant. Recuerda que Plant es un factor. Imprime el resultado por pantalla para comprobarlo
+
+```{r}
+# vemos que es un factor ordenado
+CO2$Plant
+
+CO2[order(CO2$Plant),]
+```
+
+### Ordena los datos en función del incremento de la variable uptake y el orden alfabético de la planta (en ese orden)
+
+```{r}
+CO2[order(CO2$uptake, CO2$Plant),]
+```
+
+### Ordena de nuevo los datos en function del increment de la variable uptake y el orden alfabético reverso de la planta (en ese orden)
+
+```{r}
+CO2[order(CO2$uptake, -CO2$Plant),]
+```
+
+
+
+
+## Para este ejercicio vamos a usar el dataset state.x77. Asegurate de que el objeto es un dataframe, si no lo es fuerza su conversión.
+
+
+```{r}
+class(state.x77)
+state_x77 <- as.data.frame(state.x77)
+class(state_x77)
+state_x77
+```
+
+### Averigua cuantos estados tienen ingresos (Income) menores de 4300. Pista investiga subset()
+
+```{r}
+?subset
+ingresos_menor_4300 <- subset(state_x77, state_x77$Income < 4300)
+ingresos_menor_4300
+nrow(ingresos_menor_4300)
+```
+
+Hay 20 estados con ingresos menores de 4300.
+
+### Averigua cual es el estado con los ingresos mas altos
+
+```{r}
+state_x77[which.max(state_x77$Income),]
+```
+
+### Crea un data frame 2 df2 con los datasets existentes en R: state.abb, state.area, state.division, state.name, state.region. Las filas tienen que ser los nombres de los estados.
+
+```{r}
+state.abb
+df2 <- data.frame(state.abb, state.area, state.division, state.region, row.names = state.name)
+df2
+```
+
+### Elimina de todas las variables la palabra state. Busca alguna función para strings.
+
+```{r}
+names(df2) <- gsub("state\\.", "", names(df2))
+df2
+```
+
+```{r}
+df2
+df2 <- subset(df2, select = -c(3))
+df2
+```
+
+### Añade por columnas el nuevo dataframe df2 al dataframe state.x77. Elimina las variables Life Exp, HS Grad, Frost, abb, y are.
+
+```{r}
+new_state_x77 <- cbind(state_x77, df2)
+new_state_x77
+new_state_x77 <- subset(new_state_x77, select = -c(4, 6, 7, 9, 10))
+new_state_x77
+```
+
+### Añade una variable que categorice el nivel de formacion (illiteracy) de manera que  [0,1) is low, [1,2) is some, [2, inf) is high. Pista. Hazlo de dos formas usando la función cut() y usando ifelse()
+
+
+```{r}
+Illiteracy_factor <- cut(new_state_x77$Illiteracy, c(0, 1, 2, Inf), labels = c("low", "some", "high"), ordered_result = TRUE)
+new_state_x77_cut <- cbind(new_state_x77, Illiteracy_factor)
+new_state_x77_cut
+
+Illiteracy_factor <- ifelse(new_state_x77$Illiteracy < 1, "low", ifelse(new_state_x77$Illiteracy < 2, "some", "high"))
+
+Illiteracy_factor <- factor(Illiteracy_factor, levels = c("low", "some", "high"), ordered = TRUE)
+new_state_x77_ifelse <- cbind(new_state_x77, Illiteracy_factor)
+new_state_x77_ifelse
+
+```
+
+
+### Encuentra que estado del oeste (west) tiene la formación mas baja y los mayors ingresos. ¿Que estado es?
+
+```{r}
+new_state_x77[which(new_state_x77$region == "West" & new_state_x77$Illiteracy == min(new_state_x77$Illiteracy)),]
+```
+
+
+
+
+
+
+
+
