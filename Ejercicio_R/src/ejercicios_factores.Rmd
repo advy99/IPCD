@@ -1,0 +1,111 @@
+---
+title: "Ejercicios factores"
+author: "Antonio David Villegas Yeguas"
+date: "29/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Factors
+
+## Dado x = c(1, 2, 3, 3, 5, 3, 2, 4, NA), ¿cuáles son los levels de factor(x)?
+
+Es 1, 2, 3, 4 y 5, ya que NA se es un valor perdido dentro de dichos niveles, por lo que no podrá ser parte de los niveles.
+
+```{r}
+x <- c(1, 2, 3, 3, 5, 3, 2, 4, NA)
+factor(x)
+```
+
+## Dado x <- c(11, 22, 47, 47, 11, 47, 11) y la ejecución de la sentencia 
+factor(x, levels=c(11, 22, 47), ordered=TRUE)
+¿cuál es el cuarto elemento de la salida?
+
+Es 47, ya que el cuarto elemento pertenece al último nivel
+
+```{r}
+x <- c(11, 22, 47, 47, 11, 47, 11)
+factor(x, levels=c(11, 22, 47), ordered=TRUE)
+```
+
+
+## Para el factor z <- c("p", "a" , "g", "t", "b"), reemplaza el tercer elemento de z por "b".
+
+Sería la tercera opción, cambiando el tercer elemento por una b cambiaría el factor, y haría que el tercer elemento de z sea una b. La opción a no está permitida, ya que no existe una funcion factor<-, solo la de consulta, y la opción b sería correcta si no existiera el nivel "b" dentro del factor, y los corchetes deberían estar fuera de los argumentos, lo que cambiaria el nivel 3 del factor z, pero como ya existe ese nivel no nos debería dejar duplicarlo.
+
+```{r}
+z <- c("p", "a" , "g", "t", "b")
+z[3] <- "b"
+factor(z)
+```
+
+## Dado z <- factor(c("p", "q", "p", "r", "q")) escribe una expresión de R que cambie el level  "p" a "w"
+
+
+```{r}
+z <- factor(c("p", "q", "p", "r", "q"))
+z
+levels(z)[1] <- "w"
+z
+```
+
+
+
+
+## Usa el dataset “iris”
+
+```{r}
+iris_data <- iris
+```
+
+### escribe la expresión necesaria para convertir la variable “Sepal.Length”  en un factor con cinco niveles (levels) . Pista (mira la función table() y la función cut().
+
+Con `table(iris_data$Sepal.Length)` he observado los valores de la caracteristica Sepal.Length, y he decido separar en los puntos de corte, 3.5, 4.5, 5.5, 6.5, 7.5 y 8.5 para hacer un factor de cinco niveles con `cut`.
+
+```{r}
+table(iris_data$Sepal.Length)
+levels(cut(iris_data$Sepal.Length, c(seq(3.5, 8.5, 1))))
+iris_data$Sepal.Length
+```
+
+
+### escribe la expresión necesaria para generar una tabla de frecuencias con dos filas y tres columnas. Las filas deben referirse a si la variable “Sepal.length” es menor que 5 y las columnas a las diferentes especies.
+
+Simplemente comparamos el vector lógico de `iris_data$Sepal.Length < 5` con el vector de especies de iris con la función `table`.
+
+```{r}
+table(iris_data$Sepal.Length < 5, iris_data$Species)
+```
+
+## El factor responses se define como
+
+```{r}
+responses <- factor(c("Agree", "Agree", "Strongly Agree","Disagree", "Agree"))
+```
+
+sin embargo nos damos cuenta que tiene un nuevo nivel, "Strongly Disagree", que no estaba presente cuando se creó. Añade el nuevo nivel al factor y conviértelo en un factor ordenado.
+
+Aplicamos un `relevel` para reordenar los niveles, y del resultado pasamos el factor a uno ordenado. Tras esto, añadimos el último nivel que nos piden.
+
+```{r}
+responses <- ordered(relevel(responses, ref = "Strongly Agree"))
+levels(responses) <- c(levels(responses), "Strongly Disagree")
+responses
+
+```
+
+## Dado el factor:
+
+```{r}
+x <- factor(c("high","low","medium","high","high","low","medium"))
+```
+
+escribe la expresión en R que permita dar valores numéricos únicos para los distintos niveles (levels) de x según el siguiente esquema
+
+```{r}
+data.frame(unique(as.numeric(x)))
+```
