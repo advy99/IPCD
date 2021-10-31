@@ -1,0 +1,303 @@
+---
+title: "Ejercicios dia 3"
+author: "Antonio David Villegas Yeguas"
+date: "30/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Dataframes
+
+## Busca los datasets “beaver1” y “beaver2” que contienen información sobre la temperatura corporal de dos castores. Añade una columna llamada “ID” al dataset beaver1 que tenga siempre el valor 1. De forma similar añade una columna “ID” al dataset beaver2 que tenga siempre el valor 2. A continuación concatena de forma vertical los dos dataframes y busca el subset de datos donde ambos Castores están activos.
+
+```{r}
+?beaver1
+?beaver2
+
+datos_beaver1 <- beaver1
+datos_beaver1
+ID <- rep.int(1, nrow(datos_beaver1))
+datos_beaver1 <- cbind(datos_beaver1, ID)
+datos_beaver1
+
+datos_beaver2 <- beaver2
+ID <- rep.int(2, nrow(datos_beaver2))
+datos_beaver2 <- cbind(datos_beaver2, ID)
+datos_beaver2
+
+datos_beaver <- rbind(datos_beaver1, datos_beaver2)
+datos_beaver
+
+
+beaver_activos <- subset(datos_beaver, activ == 1)
+beaver_activos
+```
+
+
+
+
+
+
+## Vamos a trabajar con un ejemplo que viene por defecto en la instalación de R USArrests. Este data frame contiene la información para cada estado Americano de las tasas de criminales (por 100.000 habitantes). Los datos de las columnas se refieren a Asesinatos, violaciones y porcentaje de la población que vive en áreas urbanas. Los datos son de 1973. Contesta a las siguientes preguntas sobre los datos
+
+Estas preguntas ya están respondidas en la entrega sobre dataframes del día 2.
+
+
+## Carga el set de datos CO2 y realiza las siguientes acciones
+
+Estas preguntas ya están respondidas en la entrega sobre dataframes del día 2.
+
+
+# Importando información
+
+
+## Vamos a trabajar con otro dataframe. Descarga el fichero student.txt de la plataforma PRADO, almacena la información en una variable llamada “students”. Ten en cuenta que los datos son tab-delimited y tienen un texto para cada columna. Comprueba que R ha leído correctamente el fichero imprimiendo el objeto en la pantalla
+
+```{r}
+students <- read.delim("student.txt")
+students
+```
+
+
+### Imprime solo los nombres de la columnas
+
+```{r}
+colnames(students)
+```
+
+### Llama a la columna “height” solo
+
+```{r}
+students$height
+```
+
+### ¿Cuantas observaciones hay en cada grupo?. Utiliza la función table().  Este comando se puede utilizar para crear tablas cruzadas
+
+```{r}
+table(students$population)
+```
+
+### Crea nuevas variables a partir de los datos que tenemos. Vamos a crear una variable nueva “sym” que contenga M si el genero es masculino y F si el genero es femenino. Busca en la ayuda información sobre la función ifelse(). Crea una segunda variable “colours” cuyo valor será “Blue” si el estudiante es de kuopio y “Red” si es de otro sitio.
+
+```{r}
+?ifelse
+
+sym <- ifelse(students$gender == "female", "F", "M")
+students <- cbind(students, sym)
+students
+
+colours <- ifelse(students$population == "kuopio", "Blue", "Red")
+students <- cbind(students, colours)
+students
+```
+
+### Con los datos anteriores de height y shoesize y las nuevas variables crea un nuevo data.frame que se llame students.new
+
+```{r}
+students.new <- data.frame(students[,-c(3, 4)])
+students.new
+```
+
+### Comprueba que la clase de student.new es un dataframe
+
+```{r}
+class(students.new)
+```
+
+### Crea dos subsets a partir del set de datos student. Divídelo dependiendo del sexo. Para ello primero comprueba que estudiantes son hombres (male). Pista: busca información sobre la función which().
+
+Basándote en esa selección dada por which() toma solo esas filas del dataset student para generar el subset stundent.male
+
+
+Repite el procedimiento para seleccionar las estudiantes mujeres (females)
+
+```{r}
+# podemos hacerlo con subset:
+students_male <- subset(students, gender == "male")
+students_female <- subset(students, gender == "female")
+
+students_male
+students_female
+
+
+# o podemos hacerlo con which
+
+students_male <- students[which(students$gender == "male"),]
+students_female <- students[which(students$gender == "female"),]
+
+students_male
+students_female
+
+```
+
+
+## Utiliza la function write.table() para guarder el contenido de student.new en un archivo
+
+```{r}
+write.table(students.new, "students_new.txt")
+```
+
+
+# Lists
+
+
+## Ejecuta los comandos y describe que es lo que ocurre:
+
+```{r}
+my_list <- list(name="Fred", wife="Mary", no.children=3, child.ages=c(4,7,9))
+attributes(my_list)
+```
+
+Este comando crea una lista con cuatro elementos con nombre, "name", "wife", "no.children", y "child.ages". También consulta el nombre de los atributos con `attributes`
+
+```{r}
+names(my_list)
+my_list[2]
+```
+
+Con `names` consulta el nombre de los atributos, y con el operador corchete accede al segundo elemento.
+
+```{r}
+my_list[[2]]
+```
+
+Con el doble corchete también accedemos a un elemento de una lista
+
+```{r}
+my_list$wife
+```
+
+Si la lista tiene atributos con nombre (como es el caso), también es otra forma de acceder a ellos
+
+```{r}
+my_list[[4]][2]
+```
+
+En este caso utilizamos el operador doble corchete para acceder al cuarto elemento de la lista (un vector con edades), y al resultado le aplicamos el operador corchete para acceder al segundo elemento del vector almacenado en la cuarta posición de la lista.
+
+
+```{r}
+length(my_list[[4]])
+```
+
+Con `length` consultamos la longitud del elemento pasado como argumento. En este caso el vector de edades dentro de la lista.
+
+```{r}
+my_list$wife <- 1:12
+```
+
+En este caso estamos cambiando el contenido del atributo `wife` de la lista por un vector de números del 1 al 12.
+
+```{r}
+my_list$wife <- NULL
+```
+
+En este caso estamos cambiando el valor del atributo `wife` por `NULL`, por lo que lo estamos eliminando.
+
+
+```{r}
+my_list <- c(my_list, list(my_title2=month.name[1:12]))
+```
+
+Con este comando hemos añadido a la lista una nueva lista que se llama `my_tiyle2`, con los nombres de los meses.
+
+```{r}
+unlist(my_list)
+```
+
+Este comando nos devuelve los elementos de la lista en un vector de forma secuencial.
+
+```{r}
+data.frame(unlist(my_list));
+```
+
+Este comando deslista los elementos, y los convierte en un dataframe. Como vemos ha usado los nombres de la lista para los nombres de las filas.
+
+
+```{r}
+matrix(unlist(my_list))
+
+```
+
+Al igual que el comando anterior, los deslista, pero los convierte en una matriz en lugar de un dataframe.
+
+
+
+# table()
+
+## Cuenta el numero de entradas idénticas en la variable  Sepal.Length del dataset iris.
+
+```{r}
+table(iris$Sepal.Length)
+```
+
+# Como ordenar datos, hacer selecciones con if(), calcular condicionales totales, transponer columnas y filas
+
+## Vamos a volver a utilizar el datasets mtcars
+
+## Ordena este data set de forma ascendente según su valo de hp
+
+```{r}
+library(tidyverse)
+mtcars %>% arrange(hp)
+```
+
+### Hazlo ahora de forma descendente
+
+```{r}
+mtcars %>% arrange(desc(hp))
+```
+
+### Calcula la media de la columna mpg
+
+```{r}
+mean(mtcars$mpg)
+```
+
+### Calcula la media de mpg para aquellos datos cuyo valor de hp sea menor que 150 y por separado para aquellos cuyo valor de hp sea mayor o igual a 150
+
+```{r}
+mtcars %>% filter(hp < 150) %>% 
+		summarise(media = mean(hp))
+		
+mtcars %>% filter(hp >= 150) %>% 
+		summarise(media = mean(hp))
+```
+
+### Busca los valores únicos de la columna cyl de mtcars
+
+```{r}
+mtcars %>% select(cyl) %>%
+			unique()
+```
+
+
+### Obten los datos de mpg cyl disp hp para “Toyota Corolla"
+
+```{r}
+mtcars["Toyota Corolla",c("mpg", "cyl", "disp", "hp")]
+```
+
+
+### Crea una nueva variable mpgClass de tipo categórico cuyo valor es “Low“ si el valor de mpg es menor que la media de la columna mpg y “High” si es mayor que la media de mpg
+
+
+```{r}
+media_mpg <- mean(mtcars$mpg)
+mpgClass <- ifelse(mtcars$mpg < media_mpg, "Low", "High")
+mtcars_new <- cbind(mtcars, mpgClass)
+mtcars_new
+```
+
+
+
+
+
+
+
+
+
+
