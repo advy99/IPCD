@@ -13,6 +13,7 @@ import numpy as np
 import sklearn as skl
 import sklearn.model_selection
 import sklearn.preprocessing
+import sklearn.metrics
 
 ### modelos de sklearn a utilizar
 import sklearn.linear_model
@@ -30,7 +31,7 @@ import sklearn.discriminant_analysis
 #
 
 
-def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, normalizar = True, porcentaje_test = 0.2):
+def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, normalizar = True, porcentaje_test = 0.2):
 	"""
 	Funcion para entrenar un modelo.
 	Parametros:
@@ -39,6 +40,7 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 		etiquetas: Etiquetas asociadas a los predictores
 		predictores_test: Predictores para el conjunto de test, por defecto None
 		etiquetas_test: Etiquetas asociadas al conjunto de test, por defecto None
+		num_folds: Numero de folds para aplicar en validación cruzada, por defecto 10
 		normalizar: Booleano para marcar si es necesario normalizar o no los predictores, por defecto True
 		porcentaje_test: Porcentaje de datos que conformarán el conjunto de test si no se ha pasado el conjunto de test
 
@@ -62,13 +64,16 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 		predictores = escalado.transform(predictores)
 		predictores_test = escalado.transform(predictores_test)
 
-	modelo.fit(predictores, etiquetas)
 
-	train_accuraccy = np.mean(modelo.predict(predictores) == etiquetas)
-	test_accuraccy = np.mean(modelo.predict(predictores_test) == etiquetas_test)
+	resultado = skl.model_selection.cross_validate(modelo, predictores, etiquetas, cv = num_folds, scoring = "accuracy", return_estimator = True)
+
+	mejor_modelo = np.argmax(resultado["test_score"])
+
+	train_accuraccy_cv = np.mean(resultado["test_score"])
+	test_accuraccy = np.mean(resultado["estimator"][mejor_modelo].predict(predictores_test) == etiquetas_test)
 
 
-	return modelo, train_accuraccy, test_accuraccy
+	return modelo, train_accuraccy_cv, test_accuraccy
 
 
 
