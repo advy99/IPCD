@@ -56,19 +56,30 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	if predictores_test == None or etiquetas_test == None:
 		# separamos en entrenamiento y test dejando un 80% de los datos en entrenamiento
 		# y un 20% en test
-		predictores, predictores_test, etiquetas, etiquetas_test = skl.model_selection.train_test_split(predictores, etiquetas, test_size = porcentaje_test)
+		predictores, predictores_test, etiquetas, etiquetas_test = skl.model_selection.train_test_split(predictores,
+																										etiquetas,
+																										test_size = porcentaje_test)
 
 	if normalizar:
+		# utilizamos un standard scaler para normalizar (media 0 y desviación 1)
 		escalado = skl.preprocessing.StandardScaler()
 		escalado.fit(predictores)
 		predictores = escalado.transform(predictores)
 		predictores_test = escalado.transform(predictores_test)
 
 
-	resultado = skl.model_selection.cross_validate(modelo, predictores, etiquetas, cv = num_folds, scoring = "accuracy", return_estimator = True)
+	# hacemos la validación cruzada
+	resultado = skl.model_selection.cross_validate(modelo, predictores,
+													etiquetas, cv = num_folds,
+													scoring = "accuracy",
+													return_estimator = True)
 
+	# de todos los resultados obtenidos, buscamos el indice del mejor modelo
+	# en test de cada fold
 	mejor_modelo = np.argmax(resultado["test_score"])
 
+	# calculamos la precisión del modelo en train y test, en test prediciendo
+	# con el mejor modelo obtenido
 	train_accuraccy_cv = np.mean(resultado["test_score"])
 	test_accuraccy = np.mean(resultado["estimator"][mejor_modelo].predict(predictores_test) == etiquetas_test)
 
