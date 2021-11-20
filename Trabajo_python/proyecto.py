@@ -23,6 +23,7 @@ import sklearn.neural_network
 
 ### para reducción de dimensionalidad
 import sklearn.decomposition
+import sklearn.discriminant_analysis
 
 #
 # Funciones
@@ -89,34 +90,41 @@ def main():
 	print("Tamaño de los predictores: ", predictores.shape)
 	print("Tamaño de las etiquetas: ", etiquetas.shape)
 
-	print("Pasamos a probar un modelo básico de regresión logistica.")
+	modelo_pca = skl.decomposition.PCA(n_components = "mle")
+	modelo_pca.fit(predictores)
+	predictores_pca = modelo_pca.transform(predictores)
 
-	modelo_RL, train_accuraccy_RL, test_accuraccy_RL = entrenar_modelo(skl.linear_model.LogisticRegression(), predictores, etiquetas)
+	print("Tamaño de los predictores tras PCA con MLE: ", predictores_pca.shape)
+
+
+	print("Pasamos a probar con distintos modelos.")
+
+	modelo_RL, train_accuraccy_RL, test_accuraccy_RL = entrenar_modelo(skl.linear_model.LogisticRegression(), predictores_pca, etiquetas)
 
 	print("Accuraccy en train con regresión logistica: ", train_accuraccy_RL)
 	print("Accuraccy en test con regresión logistica: ", test_accuraccy_RL)
 	print()
 
 
-	modelo_DT, train_accuraccy_tree, test_accuraccy_tree = entrenar_modelo(skl.tree.DecisionTreeClassifier(), predictores, etiquetas)
+	modelo_DT, train_accuraccy_tree, test_accuraccy_tree = entrenar_modelo(skl.tree.DecisionTreeClassifier(), predictores_pca, etiquetas)
 
 	print("Accuraccy en train con un árbol de decisión: ", train_accuraccy_tree)
 	print("Accuraccy en test con un árbol de decisión: ", test_accuraccy_tree)
 	print()
 
-	modelo_RF, train_accuraccy_RF, test_accuraccy_RF = entrenar_modelo(skl.ensemble.RandomForestClassifier(), predictores, etiquetas)
+	modelo_RF, train_accuraccy_RF, test_accuraccy_RF = entrenar_modelo(skl.ensemble.RandomForestClassifier(), predictores_pca, etiquetas)
 
 	print("Accuraccy en train con Random Forest: ", train_accuraccy_RF)
 	print("Accuraccy en test con Random Forest: ", test_accuraccy_RF)
 	print()
 
-	modelo_SVC, train_accuraccy_svc, test_accuraccy_svc = entrenar_modelo(skl.svm.SVC(), predictores, etiquetas)
+	modelo_SVC, train_accuraccy_svc, test_accuraccy_svc = entrenar_modelo(skl.svm.SVC(), predictores_pca, etiquetas)
 
 	print("Accuraccy en train con SVC: ", train_accuraccy_svc)
 	print("Accuraccy en test con SVC: ", test_accuraccy_svc)
 	print()
 
-	modelo_MLP, train_accuraccy_MLP, test_accuraccy_MLP = entrenar_modelo(skl.neural_network.MLPClassifier(), predictores, etiquetas)
+	modelo_MLP, train_accuraccy_MLP, test_accuraccy_MLP = entrenar_modelo(skl.neural_network.MLPClassifier(), predictores_pca, etiquetas)
 
 	print("Accuraccy en train con MLP: ", train_accuraccy_MLP)
 	print("Accuraccy en test con MLP: ", test_accuraccy_MLP)
