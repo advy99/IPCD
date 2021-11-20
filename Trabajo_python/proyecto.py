@@ -113,38 +113,21 @@ def main():
 	print("Tamaño de los predictores tras PCA con MLE: ", predictores_pca.shape)
 
 
-	print("Pasamos a probar con distintos modelos.")
+	print("Pasamos a probar con distintos modelos y PCA.")
 
-	modelo_RL, train_accuraccy_RL, test_accuraccy_RL = entrenar_modelo(skl.linear_model.LogisticRegression(), predictores_pca, etiquetas)
+	modelos = [skl.linear_model.LogisticRegression(),
+			   skl.tree.DecisionTreeClassifier(),
+			   skl.ensemble.RandomForestClassifier(),
+			   skl.svm.SVC(),
+			   skl.neural_network.MLPClassifier()]
 
-	print("Accuraccy en train con regresión logistica: ", train_accuraccy_RL)
-	print("Accuraccy en test con regresión logistica: ", test_accuraccy_RL)
-	print()
+	for model in modelos:
+		modelo, train_accuraccy, test_accuraccy = entrenar_modelo(model, predictores_pca, etiquetas)
 
+		print("Accuraccy en train con ", type(modelo).__name__, ": ", train_accuraccy)
+		print("Accuraccy en test: ", type(modelo).__name__, ": ", test_accuraccy)
+		print()
 
-	modelo_DT, train_accuraccy_tree, test_accuraccy_tree = entrenar_modelo(skl.tree.DecisionTreeClassifier(), predictores_pca, etiquetas)
-
-	print("Accuraccy en train con un árbol de decisión: ", train_accuraccy_tree)
-	print("Accuraccy en test con un árbol de decisión: ", test_accuraccy_tree)
-	print()
-
-	modelo_RF, train_accuraccy_RF, test_accuraccy_RF = entrenar_modelo(skl.ensemble.RandomForestClassifier(), predictores_pca, etiquetas)
-
-	print("Accuraccy en train con Random Forest: ", train_accuraccy_RF)
-	print("Accuraccy en test con Random Forest: ", test_accuraccy_RF)
-	print()
-
-	modelo_SVC, train_accuraccy_svc, test_accuraccy_svc = entrenar_modelo(skl.svm.SVC(), predictores_pca, etiquetas)
-
-	print("Accuraccy en train con SVC: ", train_accuraccy_svc)
-	print("Accuraccy en test con SVC: ", test_accuraccy_svc)
-	print()
-
-	modelo_MLP, train_accuraccy_MLP, test_accuraccy_MLP = entrenar_modelo(skl.neural_network.MLPClassifier(), predictores_pca, etiquetas)
-
-	print("Accuraccy en train con MLP: ", train_accuraccy_MLP)
-	print("Accuraccy en test con MLP: ", test_accuraccy_MLP)
-	print()
 
 
 
