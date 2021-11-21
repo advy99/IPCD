@@ -106,8 +106,16 @@ def main():
 	print("Tamaño de los predictores: ", predictores.shape)
 	print("Tamaño de las etiquetas: ", etiquetas.shape)
 
-	modelo_pca = skl.decomposition.PCA(n_components = "mle")
+	# probamos PCA eliminando solo una componente
+	modelo_pca = skl.decomposition.PCA()
+	# modelo_pca = skl.discriminant_analysis.LinearDiscriminantAnalysis()
 	modelo_pca.fit(predictores)
+	print("Porcentajes de varianza explicados por cada atributo resultante de PCA: ")
+	print(modelo_pca.explained_variance_ratio_)
+
+	modelo_pca = skl.decomposition.PCA(n_components = 1)
+	modelo_pca.fit(predictores)
+
 	predictores_pca = modelo_pca.transform(predictores)
 
 	print("Tamaño de los predictores tras PCA con MLE: ", predictores_pca.shape)
@@ -121,6 +129,12 @@ def main():
 			   skl.svm.SVC(),
 			   skl.neural_network.MLPClassifier()]
 
+
+	for model in modelo:
+		# TODO: GridSearch y RandomSearch
+
+
+	# entrenamos cada modelo con sus mejores parámetros
 	for model in modelos:
 		modelo, train_accuraccy, test_accuraccy = entrenar_modelo(model, predictores_pca, etiquetas)
 
