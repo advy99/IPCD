@@ -52,7 +52,7 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	en porcentaje_test.
 
 	"""
-	
+
 	if predictores_test == None or etiquetas_test == None:
 		# separamos en entrenamiento y test dejando un 80% de los datos en entrenamiento
 		# y un 20% en test
@@ -157,27 +157,48 @@ def main():
 								   "learning_rate": ["constant", "invscaling", "adaptative"],
 								   "max_iter" : [100, 200, 300, 400, 500]}
 
-	mejores_estimadores = dict()
+	mejores_estimadores_grid_search = dict()
 
 	for modelo in modelos:
 		# TODO: GridSearch y RandomSearch
 		nombre_modelo = type(modelo).__name__
 		grid_search = skl.model_selection.GridSearchCV(modelo, parametros[nombre_modelo])
 		grid_search.fit(predictores_pca, etiquetas)
-		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " es: ")
+		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " usando GridSearchCV es: ")
 		print(grid_search.best_estimator_)
-		mejores_estimadores[nombre_modelo] = grid_search.best_estimator_
+		mejores_estimadores_grid_search[nombre_modelo] = grid_search.best_estimator_
 
 
-	# entrenamos cada modelo con sus mejores parámetros
-	for nombre_modelo, modelo in mejores_estimadores.items():
+	mejores_estimadores_randomized_search = dict()
+
+	for modelo in modelos:
+		# TODO: GridSearch y RandomSearch
+		nombre_modelo = type(modelo).__name__
+		grid_search = skl.model_selection.GridSearchCV(modelo, parametros[nombre_modelo])
+		grid_search.fit(predictores_pca, etiquetas)
+		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " usando RandomizedSearchCV es: ")
+		print(grid_search.best_estimator_)
+		mejores_estimadores_randomized_search[nombre_modelo] = grid_search.best_estimator_
+
+
+	print("\n\nResultados buscando parametros con GridSearchCV: ")
+
+	# entrenamos cada modelo con sus mejores parámetros con grid search
+	for nombre_modelo, modelo in mejores_estimadores_grid_search.items():
 		modelo_resultado, train_accuraccy, test_accuraccy = entrenar_modelo(modelo, predictores_pca, etiquetas)
 		print("Accuraccy en train con ", nombre_modelo, ": ", train_accuraccy)
 		print("Accuraccy en test con ", nombre_modelo, ": ", test_accuraccy)
 		print()
 
 
+	print("\n\n\nResultados buscando parametros con RandomizedSearchCV: ")
 
+	# entrenamos cada modelo con sus mejores parámetros con grid search
+	for nombre_modelo, modelo in mejores_estimadores_randomized_search.items():
+		modelo_resultado, train_accuraccy, test_accuraccy = entrenar_modelo(modelo, predictores_pca, etiquetas)
+		print("Accuraccy en train con ", nombre_modelo, ": ", train_accuraccy)
+		print("Accuraccy en test con ", nombre_modelo, ": ", test_accuraccy)
+		print()
 
 
 if __name__ == "__main__":
