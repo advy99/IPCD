@@ -31,7 +31,7 @@ import sklearn.discriminant_analysis
 #
 
 
-def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, normalizar = True, porcentaje_test = 0.2):
+def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, porcentaje_test = 0.2):
 	"""
 	Funcion para entrenar un modelo.
 	Parametros:
@@ -41,7 +41,6 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 		predictores_test: Predictores para el conjunto de test, por defecto None
 		etiquetas_test: Etiquetas asociadas al conjunto de test, por defecto None
 		num_folds: Numero de folds para aplicar en validación cruzada, por defecto 10
-		normalizar: Booleano para marcar si es necesario normalizar o no los predictores, por defecto True
 		porcentaje_test: Porcentaje de datos que conformarán el conjunto de test si no se ha pasado el conjunto de test
 
 	Devuelve:
@@ -53,20 +52,13 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	en porcentaje_test.
 
 	"""
+	
 	if predictores_test == None or etiquetas_test == None:
 		# separamos en entrenamiento y test dejando un 80% de los datos en entrenamiento
 		# y un 20% en test
 		predictores, predictores_test, etiquetas, etiquetas_test = skl.model_selection.train_test_split(predictores,
 																										etiquetas,
 																										test_size = porcentaje_test)
-
-	if normalizar:
-		# utilizamos un standard scaler para normalizar (media 0 y desviación 1)
-		escalado = skl.preprocessing.StandardScaler()
-		escalado.fit(predictores)
-		predictores = escalado.transform(predictores)
-		predictores_test = escalado.transform(predictores_test)
-
 
 	# hacemos la validación cruzada
 	resultado = skl.model_selection.cross_validate(modelo, predictores,
@@ -103,43 +95,85 @@ def main():
 	print("Miramos las etiquetas: ")
 	print(etiquetas[0:5])
 
-	print("Tamaño de los predictores: ", predictores.shape)
+	print("\nTamaño de los predictores: ", predictores.shape)
 	print("Tamaño de las etiquetas: ", etiquetas.shape)
 
-	# probamos PCA eliminando solo una componente
-	modelo_pca = skl.decomposition.PCA()
-	# modelo_pca = skl.discriminant_analysis.LinearDiscriminantAnalysis()
-	modelo_pca.fit(predictores)
-	print("Porcentajes de varianza explicados por cada atributo resultante de PCA: ")
+	# escalamos los datos antes de aplicar el PCA, ya que PCA calculará unos nuevos
+	# predictores a partir de los actuales, y si no están escalados le dará más
+	# importancia a unos que a otros
+	# utilizamos un standard scaler para normalizar (media 0 y desviación 1)
+	escalado = skl.preprocessing.StandardScaler()
+	escalado.fit(predictores)
+	predictores_escalados = escalado.transform(predictores)
+
+
+	# aplicamos PCA, dejando tantas características como sean necesarias
+	# para explicar un 90% de los datos
+	modelo_pca = skl.decomposition.PCA(n_components = 0.9)
+	modelo_pca.fit(predictores_escalados)
+	# como vemos con una nos basta, hemos pasado de 20 predictores a 1
+	print("Porcentajes de varianza explicados por cada atributo resultante de PCA final: ")
 	print(modelo_pca.explained_variance_ratio_)
 
-	modelo_pca = skl.decomposition.PCA(n_components = 1)
-	modelo_pca.fit(predictores)
+	predictores_pca = modelo_pca.transform(predictores_escalados)
 
-	predictores_pca = modelo_pca.transform(predictores)
-
-	print("Tamaño de los predictores tras PCA con MLE: ", predictores_pca.shape)
+	print("Tamaño de los predictores tras PCA: ", predictores_pca.shape)
 
 
-	print("Pasamos a probar con distintos modelos y PCA.")
+	print("\nPasamos a buscar los mejores parámetros para cada modelo.")
 
+	# todos los modelos que lo permiten trabajarán con NUM_CPUS para aplicar paralelismo y
+	# realizar el proceso de busqueda de parámetros más rápido
+	NUM_CPUS = 4
 	modelos = [skl.linear_model.LogisticRegression(),
 			   skl.tree.DecisionTreeClassifier(),
 			   skl.ensemble.RandomForestClassifier(),
 			   skl.svm.SVC(),
 			   skl.neural_network.MLPClassifier()]
 
+	# parametros para los modelos
+	parametros = dict()
 
-	for model in modelo:
+	parametros["LogisticRegression"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
+										"solver": ["lbfgs", "sag", "liblinear"]}
+
+	# un árbol de decisión es muy básico y no tiene muchos parámetros a ajustar
+	parametros["DecisionTreeClassifier"] = {"criterion": ["gini", "entropy"]}
+
+	parametros["RandomForestClassifier"] = {"n_estimators": [50, 100, 150, 200, 300, 500, 700],
+											"criterion": ["gini", "entropy"],
+											"bootstrap": [True, False]}
+
+	parametros["SVC"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
+						 "kernel": ["linear", "poly", "rbf", "sigmoid"],
+						 "degree": [2, 3, 4, 5],
+						 "gamma": ["scale", "auto", 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1]}
+
+
+	parametros["MLPClassifier"] = {"activation": ["relu", "tanh", "logistic", "identity"],
+								   "solver": ["adam", "sgd", "lbfgs"],
+								   "alpha": [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1],
+								   "batch_size": ["auto", 10, 50, 100, 200, 500],
+								   "learning_rate": ["constant", "invscaling", "adaptative"],
+								   "max_iter" : [100, 200, 300, 400, 500]}
+
+	mejores_estimadores = dict()
+
+	for modelo in modelos:
 		# TODO: GridSearch y RandomSearch
+		nombre_modelo = type(modelo).__name__
+		grid_search = skl.model_selection.GridSearchCV(modelo, parametros[nombre_modelo])
+		grid_search.fit(predictores_pca, etiquetas)
+		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " es: ")
+		print(grid_search.best_estimator_)
+		mejores_estimadores[nombre_modelo] = grid_search.best_estimator_
 
 
 	# entrenamos cada modelo con sus mejores parámetros
-	for model in modelos:
-		modelo, train_accuraccy, test_accuraccy = entrenar_modelo(model, predictores_pca, etiquetas)
-
-		print("Accuraccy en train con ", type(modelo).__name__, ": ", train_accuraccy)
-		print("Accuraccy en test: ", type(modelo).__name__, ": ", test_accuraccy)
+	for nombre_modelo, modelo in mejores_estimadores.items():
+		modelo_resultado, train_accuraccy, test_accuraccy = entrenar_modelo(modelo, predictores_pca, etiquetas)
+		print("Accuraccy en train con ", nombre_modelo, ": ", train_accuraccy)
+		print("Accuraccy en test con ", nombre_modelo, ": ", test_accuraccy)
 		print()
 
 
