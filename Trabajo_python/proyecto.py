@@ -35,11 +35,52 @@ import sklearn.discriminant_analysis
 def pausa():
 	input("\n\n--- Pulsa una tecla para continuar ---\n\n")
 
+
 def normalizar_datos(datos):
 	escalado = skl.preprocessing.StandardScaler()
 	escalado.fit(datos)
 	return escalado.transform(datos)
 
+
+def cargar_modelos():
+	# todos los modelos que lo permiten trabajarán con NUM_CPUS para aplicar paralelismo y
+	# realizar el proceso de busqueda de parámetros más rápido
+	NUM_CPUS = 4
+	modelos = [skl.linear_model.LogisticRegression(),
+			   skl.tree.DecisionTreeClassifier(),
+			   skl.ensemble.RandomForestClassifier(n_jobs = NUM_CPUS),
+			   skl.svm.SVC(),
+			   skl.neural_network.MLPClassifier()]
+
+	return modelos
+
+
+def cargar_grid_parametros():
+	parametros = dict()
+
+	parametros["LogisticRegression"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
+										"solver": ["lbfgs", "sag", "liblinear"]}
+
+	# un árbol de decisión es muy básico y no tiene muchos parámetros a ajustar
+	parametros["DecisionTreeClassifier"] = {"criterion": ["gini", "entropy"]}
+
+	parametros["RandomForestClassifier"] = {"n_estimators": [50, 100, 150, 200, 300, 500, 700],
+											"criterion": ["gini", "entropy"],
+											"bootstrap": [True, False]}
+
+	parametros["SVC"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
+						 "kernel": ["linear", "poly", "rbf", "sigmoid"],
+						 "degree": [2, 3, 4, 5],
+						 "gamma": ["scale", "auto", 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1]}
+
+
+	parametros["MLPClassifier"] = {"activation": ["relu", "tanh", "logistic"],
+								   "solver": ["adam", "sgd"],
+								   "alpha": [0.0001, 0.0005, 0.001, 0.005],
+								   "learning_rate": ["constant", "invscaling", "adaptive"],
+								   "max_iter" : [300, 400, 500, 600]}
+
+	return parametros
 
 def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
 	mejores_estimadores = dict()
@@ -52,7 +93,7 @@ def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
 		print(grid_search.best_estimator_)
 		mejores_estimadores[nombre_modelo] = grid_search.best_estimator_
 
-	mejores_estimadores
+	return mejores_estimadores
 
 
 def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, porcentaje_test = 0.2):
@@ -154,43 +195,22 @@ def main():
 
 	print("\nPasamos a buscar los mejores parámetros para cada modelo.")
 
-	# todos los modelos que lo permiten trabajarán con NUM_CPUS para aplicar paralelismo y
-	# realizar el proceso de busqueda de parámetros más rápido
-	NUM_CPUS = 4
-	modelos = [skl.linear_model.LogisticRegression(),
-			   skl.tree.DecisionTreeClassifier(),
-			   skl.ensemble.RandomForestClassifier(n_jobs = NUM_CPUS),
-			   skl.svm.SVC(),
-			   skl.neural_network.MLPClassifier()]
+	modelos = cargar_modelos()
 
 	# parametros para los modelos
-	parametros = dict()
+	parametros = cargar_grid_parametros()
 
-	parametros["LogisticRegression"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
-										"solver": ["lbfgs", "sag", "liblinear"]}
+	mejores_estimadores_grid_search = busqueda_hiperparametros(modelos,
+															   parametros,
+															   predictores_pca,
+															   etiquetas,
+															   skl.model_selection.GridSearchCV)
 
-	# un árbol de decisión es muy básico y no tiene muchos parámetros a ajustar
-	parametros["DecisionTreeClassifier"] = {"criterion": ["gini", "entropy"]}
-
-	parametros["RandomForestClassifier"] = {"n_estimators": [50, 100, 150, 200, 300, 500, 700],
-											"criterion": ["gini", "entropy"],
-											"bootstrap": [True, False]}
-
-	parametros["SVC"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
-						 "kernel": ["linear", "poly", "rbf", "sigmoid"],
-						 "degree": [2, 3, 4, 5],
-						 "gamma": ["scale", "auto", 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1]}
-
-
-	parametros["MLPClassifier"] = {"activation": ["relu", "tanh", "logistic"],
-								   "solver": ["adam", "sgd"],
-								   "alpha": [0.0001, 0.0005, 0.001, 0.005],
-								   "learning_rate": ["constant", "invscaling", "adaptive"],
-								   "max_iter" : [300, 400, 500, 600]}
-
-	mejores_estimadores_grid_search = busqueda_hiperparametros(modelos, parametros, predictores_pca, etiquetas, skl.model_selection.GridSearchCV)
-
-	mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos, parametros, predictores_pca, etiquetas, skl.model_selection.RandomizedSearchCV)
+	mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos,
+																	 parametros,
+																	 predictores_pca,
+																	 etiquetas,
+																	 skl.model_selection.RandomizedSearchCV)
 
 
 	print("\n\nResultados buscando parametros con GridSearchCV: ")
