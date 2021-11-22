@@ -5,11 +5,13 @@
 #
 
 import os
+import sys
 
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 ## modulos de sklearn
 import sklearn as skl
@@ -28,6 +30,22 @@ import sklearn.neural_network
 import sklearn.decomposition
 import sklearn.discriminant_analysis
 
+### para ignorar los warnings de convergencia de sklearn
+### ya sabemos que faltan iteraciones para una red neuronal, pero ya tarda
+### bastante con toda la busqueda de hiperparámetros
+import warnings
+import sklearn.exceptions
+warnings.filterwarnings(action='ignore', category=sklearn.exceptions.ConvergenceWarning)
+
+#
+# Constantes
+#
+
+DIR_MODELOS = "modelos/"
+NUM_CPUS = 4
+GRID_SEARCH_EXTENSION = "_GridSearchCV.pck"
+RANDOMIZED_SEARCH_EXTENSION = "_RandomizedSearchCV.pck"
+
 #
 # Funciones
 #
@@ -41,11 +59,46 @@ def normalizar_datos(datos):
 	escalado.fit(datos)
 	return escalado.transform(datos)
 
+def almacenar_modelos(modelos, extension):
+	# guardamos los modelos
+	for estimador in modelos:
+		nombre_fichero = type(modelo).__name__ + extension
+		with open( nombre_fichero , "wb") as f:
+			pickle.dump(estimador, f)
+
+def cargar_modelos(modelos, ruta):
+	i = 0
+	he_podido_cargar_modelos = True
+
+	mejores_estimadores_grid_search = dict()
+	mejores_estimadores_randomized_search = dict()
+
+	while he_podido_cargar_modelos and i < len(modelos):
+		nombre_modelo = type(modelos[i]).__name__
+		nombre_modelo_grid = nombre_modelo + GRID_SEARCH_EXTENSION
+		nombre_modelo_randomized = nombre_modelo + RANDOMIZED_SEARCH_EXTENSION
+
+		he_podido_cargar_modelos = os.path.exists(ruta + "/" + nombre_modelo_grid) and os.path.exists(ruta + "/" + nombre_modelo_randomized)
+
+		if he_podido_cargar_modelos:
+			with open(ruta + "/" + nombre_modelo_grid, "rb") as f:
+				mejores_estimadores_grid_search[nombre_modelo] = pickle.load(f)
+
+			with open(ruta + "/" + nombre_modelo_randomized, "rb") as f:
+				mejores_estimadores_randomized_search[nombre_modelo] = pickle.load(f)
+
+		i += 1
+
+	if not he_podido_cargar_modelos:
+		mejores_estimadores_grid_search = None
+		mejores_estimadores_randomized_search = None
+
+	return mejores_estimadores_grid_search, mejores_estimadores_randomized_search
+
 
 def cargar_modelos():
 	# todos los modelos que lo permiten trabajarán con NUM_CPUS para aplicar paralelismo y
 	# realizar el proceso de busqueda de parámetros más rápido
-	NUM_CPUS = 4
 	modelos = [skl.linear_model.LogisticRegression(),
 			   skl.tree.DecisionTreeClassifier(),
 			   skl.ensemble.RandomForestClassifier(n_jobs = NUM_CPUS),
@@ -91,6 +144,7 @@ def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
 		grid_search.fit(X, Y)
 		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " es: ")
 		print(grid_search.best_estimator_)
+		print()
 		mejores_estimadores[nombre_modelo] = grid_search.best_estimator_
 
 	return mejores_estimadores
@@ -149,7 +203,7 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 
 def main():
 	# leemos los datos
-	datos = 	pd.read_csv("datos/SouthGermanCredit.csv", sep = " ")
+	datos = pd.read_csv("datos/SouthGermanCredit.csv", sep = " ")
 	print("Nombres de las columnas: ", datos.columns)
 	predictores = datos.iloc[:,:-1].to_numpy()
 	etiquetas = datos.kredit.to_numpy()
@@ -190,27 +244,53 @@ def main():
 
 	pausa()
 
-	# if not os.path.exists(DIR_MODELOS):
-	# 	os.mkdir(DIR_MODELOS)
-
-	print("\nPasamos a buscar los mejores parámetros para cada modelo.")
-
 	modelos = cargar_modelos()
 
 	# parametros para los modelos
 	parametros = cargar_grid_parametros()
 
-	mejores_estimadores_grid_search = busqueda_hiperparametros(modelos,
-															   parametros,
-															   predictores_pca,
-															   etiquetas,
-															   skl.model_selection.GridSearchCV)
+	mejores_estimadores_grid_search = dict()
+	mejores_estimadores_randomized_search = dict()
 
-	mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos,
-																	 parametros,
-																	 predictores_pca,
-																	 etiquetas,
-																	 skl.model_selection.RandomizedSearchCV)
+	if not os.path.exists(DIR_MODELOS):
+	 	os.mkdir(DIR_MODELOS)
+
+
+	he_podido_cargar_modelos = False
+
+	# miro si tengo que cargar los modelos
+	if "cargar_modelos" in sys.argv:
+		print("Cargando modelos de la carpeta: ", DIR_MODELOS)
+
+		mejores_estimadores_grid_search, mejores_estimadores_randomized_search = cargar_modelos(modelos, DIR_MODELOS)
+		he_podido_cargar_modelos = mejores_estimadores_grid_search is not None
+
+
+
+	# si no los he podido cargar (ya sea porque no quería, o por un error)
+	# los buscamos
+	if not he_podido_cargar_modelos:
+		print("\nPasamos a buscar los mejores parámetros para cada modelo.")
+
+		mejores_estimadores_grid_search = busqueda_hiperparametros(modelos,
+																   parametros,
+																   predictores_pca,
+																   etiquetas,
+																   skl.model_selection.GridSearchCV)
+
+		mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos,
+																		 parametros,
+																		 predictores_pca,
+																		 etiquetas,
+																		 skl.model_selection.RandomizedSearchCV)
+
+
+
+
+	# guardamos los modelos si no los hemos podido cargar
+	if not he_podido_cargar_modelos:
+		almacenar_modelos(mejores_estimadores_grid_search, GRID_SEARCH_EXTENSION)
+		almacenar_modelos(mejores_estimadores_randomized_search, RANDOMIZED_SEARCH_EXTENSION)
 
 
 	print("\n\nResultados buscando parametros con GridSearchCV: ")
