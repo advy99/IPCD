@@ -348,6 +348,8 @@ def main():
 		mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos,
 																		 parametros,
 																		 predictores_pca,
+																		 etiquetas,
+																		 skl.model_selection.RandomizedSearchCV)
 
 	# guardamos los modelos si no los hemos podido cargar
 	if not he_podido_cargar_modelos:
