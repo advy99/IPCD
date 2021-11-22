@@ -80,15 +80,15 @@ def almacenar_modelos(modelos, extension, ruta = DIR_MODELOS):
 	extensión dada como parámetro.
 
 	Recibe:
-		modelos: Lista de modelos de scikit-learn a almacenar
+		modelos: Diccionario de modelos de scikit-learn a almacenar
 		extension: Extensión a añadir al almacenar los modelos
 		ruta: Ruta donde almacenar los modelos
 
 	"""
 
 	# para cada modelo, le añado la extensión y hago el dump con pickle
-	for estimador in modelos:
-		nombre_fichero = type(estimador).__name__ + extension
+	for nombre, estimador in modelos.items():
+		nombre_fichero = nombre + extension
 		with open(ruta + "/" + nombre_fichero , "wb") as f:
 			pickle.dump(estimador, f)
 
