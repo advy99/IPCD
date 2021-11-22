@@ -4,6 +4,8 @@
 # Bibliotecas que utilizaremos
 #
 
+import os
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -29,6 +31,28 @@ import sklearn.discriminant_analysis
 #
 # Funciones
 #
+
+def pausa():
+	input("\n\n--- Pulsa una tecla para continuar ---\n\n")
+
+def normalizar_datos(datos):
+	escalado = skl.preprocessing.StandardScaler()
+	escalado.fit(datos)
+	return escalado.transform(datos)
+
+
+def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
+	mejores_estimadores = dict()
+
+	for modelo in modelos:
+		nombre_modelo = type(modelo).__name__
+		grid_search = funcion_busqueda(modelo, parametros[nombre_modelo])
+		grid_search.fit(X, Y)
+		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " es: ")
+		print(grid_search.best_estimator_)
+		mejores_estimadores[nombre_modelo] = grid_search.best_estimator_
+
+	mejores_estimadores
 
 
 def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, porcentaje_test = 0.2):
@@ -98,14 +122,18 @@ def main():
 	print("\nTamaño de los predictores: ", predictores.shape)
 	print("Tamaño de las etiquetas: ", etiquetas.shape)
 
+	pausa()
+
 	# escalamos los datos antes de aplicar el PCA, ya que PCA calculará unos nuevos
 	# predictores a partir de los actuales, y si no están escalados le dará más
 	# importancia a unos que a otros
 	# utilizamos un standard scaler para normalizar (media 0 y desviación 1)
-	escalado = skl.preprocessing.StandardScaler()
-	escalado.fit(predictores)
-	predictores_escalados = escalado.transform(predictores)
+	predictores_escalados = normalizar_datos(predictores)
 
+	print("Miramos los predictores tras escalarlos: ")
+	print(predictores_escalados[0:5])
+
+	pausa()
 
 	# aplicamos PCA, dejando tantas características como sean necesarias
 	# para explicar un 90% de los datos
@@ -119,6 +147,10 @@ def main():
 
 	print("Tamaño de los predictores tras PCA: ", predictores_pca.shape)
 
+	pausa()
+
+	# if not os.path.exists(DIR_MODELOS):
+	# 	os.mkdir(DIR_MODELOS)
 
 	print("\nPasamos a buscar los mejores parámetros para cada modelo.")
 
@@ -127,7 +159,7 @@ def main():
 	NUM_CPUS = 4
 	modelos = [skl.linear_model.LogisticRegression(),
 			   skl.tree.DecisionTreeClassifier(),
-			   skl.ensemble.RandomForestClassifier(),
+			   skl.ensemble.RandomForestClassifier(n_jobs = NUM_CPUS),
 			   skl.svm.SVC(),
 			   skl.neural_network.MLPClassifier()]
 
@@ -150,35 +182,15 @@ def main():
 						 "gamma": ["scale", "auto", 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1]}
 
 
-	parametros["MLPClassifier"] = {"activation": ["relu", "tanh", "logistic", "identity"],
-								   "solver": ["adam", "sgd", "lbfgs"],
-								   "alpha": [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1],
-								   "batch_size": ["auto", 10, 50, 100, 200, 500],
-								   "learning_rate": ["constant", "invscaling", "adaptative"],
-								   "max_iter" : [100, 200, 300, 400, 500]}
+	parametros["MLPClassifier"] = {"activation": ["relu", "tanh", "logistic"],
+								   "solver": ["adam", "sgd"],
+								   "alpha": [0.0001, 0.0005, 0.001, 0.005],
+								   "learning_rate": ["constant", "invscaling", "adaptive"],
+								   "max_iter" : [300, 400, 500, 600]}
 
-	mejores_estimadores_grid_search = dict()
+	mejores_estimadores_grid_search = busqueda_hiperparametros(modelos, parametros, predictores_pca, etiquetas, skl.model_selection.GridSearchCV)
 
-	for modelo in modelos:
-		# TODO: GridSearch y RandomSearch
-		nombre_modelo = type(modelo).__name__
-		grid_search = skl.model_selection.GridSearchCV(modelo, parametros[nombre_modelo])
-		grid_search.fit(predictores_pca, etiquetas)
-		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " usando GridSearchCV es: ")
-		print(grid_search.best_estimator_)
-		mejores_estimadores_grid_search[nombre_modelo] = grid_search.best_estimator_
-
-
-	mejores_estimadores_randomized_search = dict()
-
-	for modelo in modelos:
-		# TODO: GridSearch y RandomSearch
-		nombre_modelo = type(modelo).__name__
-		grid_search = skl.model_selection.GridSearchCV(modelo, parametros[nombre_modelo])
-		grid_search.fit(predictores_pca, etiquetas)
-		print("El mejor estimador encontrado para el modelo ", nombre_modelo, " usando RandomizedSearchCV es: ")
-		print(grid_search.best_estimator_)
-		mejores_estimadores_randomized_search[nombre_modelo] = grid_search.best_estimator_
+	mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos, parametros, predictores_pca, etiquetas, skl.model_selection.RandomizedSearchCV)
 
 
 	print("\n\nResultados buscando parametros con GridSearchCV: ")
