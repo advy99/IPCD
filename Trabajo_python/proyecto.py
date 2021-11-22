@@ -195,7 +195,7 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	test_accuraccy = np.mean(resultado["estimator"][mejor_modelo].predict(predictores_test) == etiquetas_test)
 
 
-	return modelo, train_accuraccy_cv, test_accuraccy
+	return resultado["estimator"][mejor_modelo], train_accuraccy_cv, test_accuraccy
 
 
 
