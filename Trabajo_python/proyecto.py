@@ -88,7 +88,7 @@ def almacenar_modelos(modelos, extension, ruta = DIR_MODELOS):
 
 	# para cada modelo, le añado la extensión y hago el dump con pickle
 	for estimador in modelos:
-		nombre_fichero = type(modelo).__name__ + extension
+		nombre_fichero = type(estimador).__name__ + extension
 		with open(ruta + "/" + nombre_fichero , "wb") as f:
 			pickle.dump(estimador, f)
 
@@ -200,7 +200,7 @@ def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
 		funcion_busqueda: Función de sklearn.model_selection con la que realizar
 			la búsqueda de hiperparámetros
 	"""
-	
+
 	mejores_estimadores = dict()
 
 	for modelo in modelos:
@@ -343,14 +343,11 @@ def main():
 																   etiquetas,
 																   skl.model_selection.GridSearchCV)
 
+		pausa()
+
 		mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos,
 																		 parametros,
 																		 predictores_pca,
-																		 etiquetas,
-																		 skl.model_selection.RandomizedSearchCV)
-
-
-
 
 	# guardamos los modelos si no los hemos podido cargar
 	if not he_podido_cargar_modelos:
