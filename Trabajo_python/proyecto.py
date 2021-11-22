@@ -51,35 +51,75 @@ RANDOMIZED_SEARCH_EXTENSION = "_RandomizedSearchCV.pck"
 #
 
 def pausa():
+	"""
+	Para realizar una pausa en el código y revisar los resultados que se muestran
+	en pantall
+	"""
 	input("\n\n--- Pulsa una tecla para continuar ---\n\n")
 
 
 def normalizar_datos(datos):
+	"""
+	Función para normalizar unos datos dados utilziando un escalado
+	estandar de scikit learn
+
+	Recibe:
+		datos: Datos a escalar
+
+	Devuelve:
+		Datos escalados utilizando sklearn.preprocessing.StandardScaler
+	"""
 	escalado = skl.preprocessing.StandardScaler()
 	escalado.fit(datos)
 	return escalado.transform(datos)
 
-def almacenar_modelos(modelos, extension):
-	# guardamos los modelos
+def almacenar_modelos(modelos, extension, ruta = DIR_MODELOS):
+	"""
+	Función para almacenar en disco los modelos de scikit learn con pickle.
+	Como nombre del fichero se utilizará el nombre del modelo añadiendo la
+	extensión dada como parámetro.
+
+	Recibe:
+		modelos: Lista de modelos de scikit-learn a almacenar
+		extension: Extensión a añadir al almacenar los modelos
+		ruta: Ruta donde almacenar los modelos
+
+	"""
+
+	# para cada modelo, le añado la extensión y hago el dump con pickle
 	for estimador in modelos:
 		nombre_fichero = type(modelo).__name__ + extension
-		with open( nombre_fichero , "wb") as f:
+		with open(ruta + "/" + nombre_fichero , "wb") as f:
 			pickle.dump(estimador, f)
 
-def cargar_modelos(modelos, ruta):
+
+def cargar_modelos(modelos, ruta = DIR_MODELOS):
+	"""
+	Función para cargar los modelos dados desde la ruta dada
+
+	Recibe:
+		modelos: Lista de modelos, con los que se obtendrá el nombre para recuperarlos
+		ruta: Ruta donde se encuentran almacenados los modelos
+	"""
+
 	i = 0
 	he_podido_cargar_modelos = True
 
+	# creo los diccionarios vacios
 	mejores_estimadores_grid_search = dict()
 	mejores_estimadores_randomized_search = dict()
 
+	# ciclo mientras no encuentre un error
 	while he_podido_cargar_modelos and i < len(modelos):
+		# creo los nombres de los modelos a cargar
 		nombre_modelo = type(modelos[i]).__name__
 		nombre_modelo_grid = nombre_modelo + GRID_SEARCH_EXTENSION
 		nombre_modelo_randomized = nombre_modelo + RANDOMIZED_SEARCH_EXTENSION
 
+		# miro que existan en disco
 		he_podido_cargar_modelos = os.path.exists(ruta + "/" + nombre_modelo_grid) and os.path.exists(ruta + "/" + nombre_modelo_randomized)
 
+		# si existen, los cargo con pickle
 		if he_podido_cargar_modelos:
 			with open(ruta + "/" + nombre_modelo_grid, "rb") as f:
 				mejores_estimadores_grid_search[nombre_modelo] = pickle.load(f)
@@ -89,6 +129,7 @@ def cargar_modelos(modelos, ruta):
 
 		i += 1
 
+	# si no he podido cargarlos, devuelvo None
 	if not he_podido_cargar_modelos:
 		mejores_estimadores_grid_search = None
 		mejores_estimadores_randomized_search = None
@@ -96,7 +137,12 @@ def cargar_modelos(modelos, ruta):
 	return mejores_estimadores_grid_search, mejores_estimadores_randomized_search
 
 
-def cargar_modelos():
+def lista_modelos_a_usar():
+	"""
+	Función que nos devuelve los modelos que utilizaremos
+	Esta función existe solo para especificar una unica vez que modelos utilizaremos
+	"""
+
 	# todos los modelos que lo permiten trabajarán con NUM_CPUS para aplicar paralelismo y
 	# realizar el proceso de busqueda de parámetros más rápido
 	modelos = [skl.linear_model.LogisticRegression(),
@@ -108,7 +154,12 @@ def cargar_modelos():
 	return modelos
 
 
-def cargar_grid_parametros():
+def grid_parametros_a_usar():
+	"""
+	Función que nos devuelve los hiperparámetros donde buscaremos los mejores modelos
+	Esta función existe solo para especificar una unica vez que hiperparámetros utilizaremos
+	"""
+
 	parametros = dict()
 
 	parametros["LogisticRegression"] = {"C" : [0.001, 0.01, 0.1, 1, 10, 100],
@@ -136,6 +187,20 @@ def cargar_grid_parametros():
 	return parametros
 
 def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
+	"""
+	Función para realizar una busqueda de hiperparámetros en una lista de modelos
+	dada, con cierta función de busqueda
+
+	Recibe:
+		modelos: Modelos donde realizar la búsqueda
+		parametros: Diccionario con los nombres de modelos como clave y un diccionario
+			con el grid de parámetros donde buscaremos como valor.
+		X: Predictores con los que buscar los mejores parámetros
+		Y: Etiquetas con los que buscar los mejores parámetros.
+		funcion_busqueda: Función de sklearn.model_selection con la que realizar
+			la búsqueda de hiperparámetros
+	"""
+	
 	mejores_estimadores = dict()
 
 	for modelo in modelos:
@@ -244,10 +309,10 @@ def main():
 
 	pausa()
 
-	modelos = cargar_modelos()
+	modelos = lista_modelos_a_usar()
 
 	# parametros para los modelos
-	parametros = cargar_grid_parametros()
+	parametros = grid_parametros_a_usar()
 
 	mejores_estimadores_grid_search = dict()
 	mejores_estimadores_randomized_search = dict()
@@ -262,7 +327,7 @@ def main():
 	if "cargar_modelos" in sys.argv:
 		print("Cargando modelos de la carpeta: ", DIR_MODELOS)
 
-		mejores_estimadores_grid_search, mejores_estimadores_randomized_search = cargar_modelos(modelos, DIR_MODELOS)
+		mejores_estimadores_grid_search, mejores_estimadores_randomized_search = cargar_modelos(modelos)
 		he_podido_cargar_modelos = mejores_estimadores_grid_search is not None
 
 
