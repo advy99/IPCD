@@ -12,6 +12,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
+import random
 
 ## modulos de sklearn
 import sklearn as skl
@@ -45,6 +46,13 @@ DIR_MODELOS = "modelos/"
 NUM_CPUS = 4
 GRID_SEARCH_EXTENSION = "_GridSearchCV.pck"
 RANDOMIZED_SEARCH_EXTENSION = "_RandomizedSearchCV.pck"
+
+#
+# Establecemos los generadores de aleatorios
+#
+
+np.random.seed(1)
+random.seed(1)
 
 #
 # Funciones
