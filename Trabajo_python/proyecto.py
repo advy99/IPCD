@@ -10,6 +10,8 @@ import sys
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
 import numpy as np
 import pickle
 import random
@@ -370,6 +372,7 @@ def main():
 
 	plt.savefig(DIR_IMAGENES + "/distribucion_variables.png")
 	plt.show()
+
 	pausa()
 
 
@@ -397,6 +400,30 @@ def main():
 	print("Tamaño de los predictores tras PCA: ", predictores_pca.shape)
 
 	pausa()
+
+
+
+	print("Mostramos como quedan los datos en un plano 2D con respecto los dos mejores predictores obtenidos por PCA")
+	print("Tener en cuenta que seguimos con 16 predictores y los dos mejores solo explican poco más del 20% de la varianza")
+	print("Es posible que no haya una clara separación en este gráfico, pero aun así se consigan buenos resultados al entrenar los modelos")
+	plt.clf()
+	plt.figure(figsize=(12,10))
+
+	plt.title("Gráfica de los datos utilizando los dos predictores que explican mayor varianza de PCA")
+	plt.xlabel("PCA1")
+	plt.ylabel("PCA2")
+	plt.legend(loc="upper left")
+
+	scatter = plt.scatter(predictores_pca[:, 0], predictores_pca[:, 1], c = datos.kredit.astype('category'))
+	plt.legend(handles=scatter.legend_elements()[0],
+				labels = ["Pagos NO cumplidos", "Pagos cumplidos"],
+           		title="Pagos de crédito")
+	plt.savefig(DIR_IMAGENES + "/datos_pca.png")
+	plt.show()
+
+	pausa()
+
+
 
 	modelos = lista_modelos_a_usar()
 
