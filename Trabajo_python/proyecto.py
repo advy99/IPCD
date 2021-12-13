@@ -271,7 +271,34 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	return resultado["estimator"][mejor_modelo], train_accuraccy_cv, test_accuraccy
 
 
+def mostrar_matriz_correlacion(datos):
+	"""
+	Función para visualizar la matriz de correlación de un conjunto de datos dado.
+	Recibe:
+		datos: DataFrame de pandas con los datos.
+	"""
 
+	# limpiamos lo que estuviera graficado
+	plt.clf()
+
+	# sacamos la figura donde pintar
+	figura = plt.figure()
+	# mostramos la matriz de correlacion
+	plt.matshow(datos.corr(), fignum = figura.number)
+
+	# le ponemos titulos
+	plt.title('Matriz de correlación', fontsize=16)
+
+	# modificamos los ticks para que tomen el nombre de las columnas de datos
+	plt.xticks(range(datos.shape[1]), datos.columns, fontsize=14, rotation=45)
+	plt.yticks(range(datos.shape[1]), datos.columns, fontsize=14)
+
+	# ponemos la leyenda de barra de color
+	cb = plt.colorbar()
+	cb.ax.tick_params(labelsize=14)
+
+	# mostramos el gráfico
+	plt.show()
 
 
 def main():
@@ -291,6 +318,12 @@ def main():
 	print("Tamaño de las etiquetas: ", etiquetas.shape)
 
 	pausa()
+
+	print("Mostramos la matriz de correlaciones entre los datos")
+	mostrar_matriz_correlacion(datos)
+
+	pausa()
+
 
 	# escalamos los datos antes de aplicar el PCA, ya que PCA calculará unos nuevos
 	# predictores a partir de los actuales, y si no están escalados le dará más
