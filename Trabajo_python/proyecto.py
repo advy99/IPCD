@@ -226,7 +226,7 @@ def busqueda_hiperparametros(modelos, parametros, X, Y, funcion_busqueda):
 	return mejores_estimadores
 
 
-def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, porcentaje_test = 0.2):
+def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, etiquetas_test = None, num_folds = 10, porcentaje_test = 0.2, matriz_confusion = ""):
 	"""
 	Funcion para entrenar un modelo.
 	Parametros:
@@ -237,6 +237,7 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 		etiquetas_test: Etiquetas asociadas al conjunto de test, por defecto None
 		num_folds: Numero de folds para aplicar en validación cruzada, por defecto 10
 		porcentaje_test: Porcentaje de datos que conformarán el conjunto de test si no se ha pasado el conjunto de test
+		matriz_confusion: Ruta donde almacenar la imagen de la matriz de confusión obtenida. No se realizará si está vacio
 
 	Devuelve:
 		modelo: Modelo ajustado a los predictores
@@ -268,8 +269,19 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	# calculamos la precisión del modelo en train y test, en test prediciendo
 	# con el mejor modelo obtenido
 	train_accuraccy_cv = np.mean(resultado["test_score"])
-	test_accuraccy = np.mean(resultado["estimator"][mejor_modelo].predict(predictores_test) == etiquetas_test)
+	predicciones_test = resultado["estimator"][mejor_modelo].predict(predictores_test)
+	test_accuraccy = np.mean(predicciones_test == etiquetas_test)
 
+	if matriz_confusion != "":
+		plt.clf()
+		plt.figure(figsize = (12, 10))
+		plt.title("Matriz de confusión del modelo {} entrenado".format(type(modelo).__name__))
+		matriz_conf = skl.metrics.confusion_matrix(etiquetas_test, predicciones_test)
+		sns.heatmap(matriz_conf, annot = True)
+		plt.xlabel("Valor real")
+		plt.ylabel("Valor predicho")
+		plt.savefig(matriz_confusion)
+		plt.show()
 
 	return resultado["estimator"][mejor_modelo], train_accuraccy_cv, test_accuraccy
 
@@ -491,6 +503,9 @@ def main():
 		print("Accuraccy en train con ", nombre_modelo, ": ", train_accuraccy)
 		print("Accuraccy en test con ", nombre_modelo, ": ", test_accuraccy)
 		print()
+
+
+	mejor_modelo_resultado, _, _ = entrenar_modelo(mejores_estimadores_randomized_search["MLPClassifier"], predictores_pca, etiquetas, matriz_confusion = DIR_IMAGENES + "/matriz_confusion_mejor.png")
 
 
 if __name__ == "__main__":
