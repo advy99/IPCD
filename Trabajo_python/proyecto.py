@@ -324,6 +324,18 @@ def main():
 
 	pausa()
 
+	# miramos si el problema está equilibrado
+	# obtenemos los que se han concedido y los que no
+	datos = {"Cumplido": sum(etiquetas), "No_Cumplido": len(etiquetas) - sum(etiquetas)}
+	nombres = list(datos.keys())
+	valores = list(datos.values())
+
+	plt.clf()
+	plt.bar(range(len(datos)), valores, tick_label = nombres)
+	plt.show()
+
+	pausa()
+
 
 	# escalamos los datos antes de aplicar el PCA, ya que PCA calculará unos nuevos
 	# predictores a partir de los actuales, y si no están escalados le dará más
