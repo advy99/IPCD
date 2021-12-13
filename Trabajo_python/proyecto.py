@@ -43,6 +43,7 @@ warnings.filterwarnings(action='ignore', category=sklearn.exceptions.Convergence
 #
 
 DIR_MODELOS = "modelos/"
+DIR_IMAGENES = "out_images"
 NUM_CPUS = 4
 GRID_SEARCH_EXTENSION = "_GridSearchCV.pck"
 RANDOMIZED_SEARCH_EXTENSION = "_RandomizedSearchCV.pck"
@@ -271,7 +272,7 @@ def entrenar_modelo(modelo, predictores, etiquetas, predictores_test = None, eti
 	return resultado["estimator"][mejor_modelo], train_accuraccy_cv, test_accuraccy
 
 
-def mostrar_matriz_correlacion(datos):
+def mostrar_matriz_correlacion(datos, save_name = ""):
 	"""
 	Función para visualizar la matriz de correlación de un conjunto de datos dado.
 	Recibe:
@@ -282,7 +283,8 @@ def mostrar_matriz_correlacion(datos):
 	plt.clf()
 
 	# sacamos la figura donde pintar
-	figura = plt.figure()
+	figura = plt.figure(figsize=(12,10))
+
 	# mostramos la matriz de correlacion
 	plt.matshow(datos.corr(), fignum = figura.number)
 
@@ -296,6 +298,9 @@ def mostrar_matriz_correlacion(datos):
 	# ponemos la leyenda de barra de color
 	cb = plt.colorbar()
 	cb.ax.tick_params(labelsize=14)
+
+	if save_name != "":
+		plt.savefig(save_name)
 
 	# mostramos el gráfico
 	plt.show()
@@ -319,21 +324,52 @@ def main():
 
 	pausa()
 
+	if not os.path.exists(DIR_IMAGENES):
+	 	os.mkdir(DIR_IMAGENES)
+
 	print("Mostramos la matriz de correlaciones entre los datos")
-	mostrar_matriz_correlacion(datos)
+	mostrar_matriz_correlacion(datos, save_name = DIR_IMAGENES + "/matriz_correlacion.png")
 
 	pausa()
 
+	print("Mostramos si el problema está equilibrado con un gráfico de barras")
 	# miramos si el problema está equilibrado
 	# obtenemos los que se han concedido y los que no
-	datos = {"Cumplido": sum(etiquetas), "No_Cumplido": len(etiquetas) - sum(etiquetas)}
-	nombres = list(datos.keys())
-	valores = list(datos.values())
+	conteo = {"Cumplido": sum(etiquetas), "No_Cumplido": len(etiquetas) - sum(etiquetas)}
+	nombres = list(conteo.keys())
+	valores = list(conteo.values())
 
 	plt.clf()
-	plt.bar(range(len(datos)), valores, tick_label = nombres)
+	plt.figure(figsize=(12,10))
+	plt.bar(range(len(conteo)), valores, tick_label = nombres)
+	plt.title("Conteo de observaciones de cada clase del problema")
+	plt.savefig(DIR_IMAGENES + "/conteo_clases.png")
 	plt.show()
 
+	pausa()
+
+	# mostramos las distribuciones, puede ser interesante ya que muchos métodos,
+	# como PCA se comportan mejor si los datos siguen una distribución normal
+	print("Mostramos la distribución que siguen los predictores")
+	plt.clf()
+	NUM_FILS_GRAFICO = 4
+	NUM_COLS_GRAFICO = 5
+	# hacemos en subgraficos para mostrarlas todas a la vez
+	fig, axs = plt.subplots(nrows = NUM_FILS_GRAFICO, ncols = NUM_COLS_GRAFICO, figsize=(16,10))
+	fig.suptitle("Distribución de los datos para cada predictor", fontsize=30)
+	# no mostramos kredit, es la que queremos predecir, no nos interesa como sea su distribución
+	for i, column in enumerate(datos.loc[:, datos.columns != "kredit"].columns):
+		sns.kdeplot(datos[column], ax = axs[ i//NUM_COLS_GRAFICO , i%NUM_COLS_GRAFICO])
+
+	plt.subplots_adjust(left=0.1,
+	                    bottom=0.1,
+	                    right=0.9,
+	                    top=0.9,
+	                    wspace=0.4,
+	                    hspace=0.4)
+
+	plt.savefig(DIR_IMAGENES + "/distribucion_variables.png")
+	plt.show()
 	pausa()
 
 
