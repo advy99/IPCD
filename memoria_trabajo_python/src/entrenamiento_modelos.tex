@@ -1,8 +1,28 @@
 \section{Modelos a utilizar}
 
+De cara a resolver este problema utilizaremos los siguientes modelos:
+
+\begin{itemize}
+	\item Regresión Logsitica.
+	\item Árbol de decisión.
+	\item Random Forest.
+	\item Máquinas de soporte de vectores (SVM).
+	\item Multi Layer Perceptron.
+\end{itemize}
 
 
-\section{Métodos de validación}
-
+De cara a buscar los mejores hiperparámetros para estos modelos realizaremos una búsqueda de hiperparámetros como veremos en el siguiente apartado.
 
 \section{Búsqueda de hiperparámetros}
+
+Para realizar esta búsqueda de hiperparámetros se han saleccionado distintos valores para cada parámetro de todos los modelos a utilizar, y utilizando tanto GridSearchCV como RandomizedSearchCV se han obtenido los mejores hiperparámetros para cada modelo.
+
+El espacio de búsqueda de todos los parámetros se puede ver en el código adjunto a esta memoria.
+
+Debido a que esta búsqueda de hiperparámetros es muy lenta, en especial en el caso de GridSearchCV ya que este método recorre todas las posibles combinaciones, es posible ejecutar el script con el parámetro \texttt{cargar\_modelos} para que utilizando pickle cargue los modelos escogidos en una ejecución anterior. Si no es capaz de cargar estos modelos, o no se le pasa este parámetro, realizará la búsqueda de hiperparámetros y almacenará los resultados en la carpeta \texttt{modelos}.
+
+\begin{lstlisting}
+python proyecto.py cargar_modelos
+\end{lstlisting}
+
+\section{Métodos de validación}
