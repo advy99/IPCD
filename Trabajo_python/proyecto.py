@@ -46,7 +46,6 @@ warnings.filterwarnings(action='ignore', category=sklearn.exceptions.Convergence
 
 DIR_MODELOS = "modelos/"
 DIR_IMAGENES = "out_images"
-NUM_CPUS = 4
 GRID_SEARCH_EXTENSION = "_GridSearchCV.pck"
 RANDOMIZED_SEARCH_EXTENSION = "_RandomizedSearchCV.pck"
 
@@ -154,11 +153,9 @@ def lista_modelos_a_usar():
 	Esta función existe solo para especificar una unica vez que modelos utilizaremos
 	"""
 
-	# todos los modelos que lo permiten trabajarán con NUM_CPUS para aplicar paralelismo y
-	# realizar el proceso de busqueda de parámetros más rápido
 	modelos = [skl.linear_model.LogisticRegression(),
 			   skl.tree.DecisionTreeClassifier(),
-			   skl.ensemble.RandomForestClassifier(n_jobs = NUM_CPUS),
+			   skl.ensemble.RandomForestClassifier(),
 			   skl.svm.SVC(),
 			   skl.neural_network.MLPClassifier()]
 
