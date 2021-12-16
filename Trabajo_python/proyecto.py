@@ -460,7 +460,7 @@ def main():
 	# si no los he podido cargar (ya sea porque no quería, o por un error)
 	# los buscamos
 	if not he_podido_cargar_modelos:
-		print("\nPasamos a buscar los mejores parámetros para cada modelo.")
+		print("\nPasamos a buscar los mejores parámetros para cada modelo con GridSearchCV.")
 
 		mejores_estimadores_grid_search = busqueda_hiperparametros(modelos,
 																   parametros,
@@ -470,6 +470,7 @@ def main():
 
 		pausa()
 
+		print("\nPasamos a buscar los mejores parámetros para cada modelo con RandomizedSearchCV.")
 		mejores_estimadores_randomized_search = busqueda_hiperparametros(modelos,
 																		 parametros,
 																		 predictores_pca,
