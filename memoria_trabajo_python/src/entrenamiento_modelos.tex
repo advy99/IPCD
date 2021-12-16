@@ -25,4 +25,20 @@ Debido a que esta búsqueda de hiperparámetros es muy lenta, en especial en el 
 python proyecto.py cargar_modelos
 \end{lstlisting}
 
+\subsection{Mejores hiperparámetros obtenidos por GridSearchCV}
+
+
+\subsection{Mejores hiperparámetros obtenidos por RandomizedSearchCV}
+
+
 \section{Métodos de validación}
+
+De cara a validar los resultados se ha realizado tanto una separación en entrenamiento y test, además de utilizar validación cruzada en el entrenamiento. De esta forma, con los resultados de validación cruzada podemos comprobar si el modelo bien o sobreaprende los datos, mientras que con el conjunto de test podemos comprobar como funciona para datos con los que no ha entrenado.
+
+Para realizar esto se ha realizado una función que recibe el modelo a entrenar, los datos, el número de folds para validación cruzada, y el porcentaje de datos que queremos dejar en test.
+
+Si no se indica conjunto de test, se obtiene utilizando el porcentaje dado a partir del parámetro, y tras esta separación se aplica la función \texttt{cross\_validate} de scikit-learn para entrenar el modelo con validación cruzada.
+
+Tras esto se obtiene la media de precisión del modelo en validación cruzada, así como la precisión en el conjunto de test utilizando el mejor modelo obtenido de la validación cruzada.
+
+\section{Resultados}
